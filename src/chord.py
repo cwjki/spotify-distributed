@@ -25,7 +25,7 @@ class ChordNode:
     @successor.setter
     def successor(self, new_node):
         self._node_finger_table[1] = new_node
-        self._succesor_list = []
+        self._successor_list = []
 
     @property
     def predecessor(self):
@@ -37,8 +37,8 @@ class ChordNode:
         self._predecessor_keys = self.predecessor.keys
 
     @property
-    def succesors_list(self):
-        return self._succesor_list
+    def successors_list(self):
+        return self._successor_list
 
     @property
     def node_finger_table(self):
@@ -178,10 +178,11 @@ class ChordNode:
         Update all nodes whose finger table should refer to a local node 
         '''
         for i in range(1, self.size + 1):
-            predecessor = self.find_predecessor((self.id - pow(2, i-1)) % self.size)
+            predecessor = self.find_predecessor(
+                (self.id - pow(2, i-1)) % self.size)
             if predecessor and predecessor.id != self.id:
                 predecessor.update_finger_table(self.id, i)
-    
+
     def update_finger_table(self, s, i):
         '''
         If s is the ith finger of the local node, update local node 
@@ -189,11 +190,48 @@ class ChordNode:
         '''
         if self.in_range(s, self.id, self._finger_table[i]):
             if i == 1:
-                self.succesors = s
+                self.successor = s
             else:
                 self._node_finger_table[i] = s
             predecessor = self.predecessor
             if predecessor and predecessor.id != s:
                 predecessor.update_finger_table(s, i)
 
-    
+    def stabilize(self):
+        '''
+        Periodically verify local node inmediate successor and 
+        tell the successor about local node
+        '''
+        while self.successor is None:
+            if not self._successor_list:
+                self.successor = self.id
+                return
+            self.successor = self._successor_list.pop(0)
+
+        node = self.successor.predecessor
+        if node and self.in_range(node.id, self.id+1, self._node_finger_table[1]) and ((self.id + 1) % self.size) != self._node_finger_table[1]:
+            self.successor = node.id
+        if self.successor:
+            self.successor.notify(self)
+
+    def notify(self, node):
+        '''
+        Local node thinks that the node might be his predecessor
+        '''
+        if not self.predecessor:
+            for key in self._predecessor_keys.keys():
+                self._keys[key] = self._predecessor_keys[key]
+                if self.successor and self.successor.id != self.id:
+                    self.successor.update_predecessor_key(key, self._keys[key])
+
+        if not self.predecessor or self.in_range(node.id, self._node_finger_table[0] + 1, self.id):
+            self.predecessor = node.id
+
+    def update_predecessor_key(self, key, value):
+        '''
+        Update the value of a key in predecessor_key dictionary
+        '''
+        try:
+            self._predecessor_keys[key].extend(value)
+        except:
+            self._predecessor_keys[key] = value
