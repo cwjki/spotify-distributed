@@ -1,6 +1,6 @@
-from typing import Dict
-from typing_extensions import Self
+import random, time
 import Pyro4
+from typing import Dict
 from utils import hashing, get_node_instance, print_node_info
 
 
@@ -235,3 +235,28 @@ class ChordNode:
             self._predecessor_keys[key].extend(value)
         except:
             self._predecessor_keys[key] = value
+
+    def refresh_fingers(self):
+        '''
+        Periodically refresh finger table
+        '''
+        i = random.randint(2, self.size)
+        node = self.find_successor(self._finger_table_start[i])
+        if node:
+            self._node_finger_table[i] = node.id
+
+
+
+
+def stabilize_function(node: ChordNode):
+    while True:
+        try:
+            node.stabilize()
+            node.refresh_fingers()
+            time.sleep(1)
+        except:
+            pass
+
+
+
+
