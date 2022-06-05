@@ -1,5 +1,6 @@
+from typing import Dict
 import Pyro4
-from utils import hashing, get_node_instance
+from utils import hashing, get_node_instance, print_node_info
 
 
 class ChordNode:
@@ -10,7 +11,7 @@ class ChordNode:
 
         self._finger_table = []
         self._node_finger_table = []
-        self._succesor_list = []
+        self._successor_list = []
 
     @property
     def id(self):
@@ -75,7 +76,7 @@ class ChordNode:
 
     def closest_finger(self, idx) -> 'ChordNode':
         '''
-        Return the closest node in the finger table after node idx 
+        Return the closest node in the finger table after node idx
         '''
         for i in range(self.size, 0, -1):
             if self.in_range(self._node_finger_table[i], self.id + 1, idx):
@@ -96,9 +97,42 @@ class ChordNode:
             temp_node = node
         return node
 
-    def find_successor(self, idx):
+    def find_successor(self, idx) -> 'ChordNode':
         '''
         Find the node successor id
         '''
         node = self.find_predecessor(idx)
         return node.successor if node else None
+
+    def join(self, node_id=None) -> bool:
+        '''
+        If node was successfully joined return True
+        else False
+        '''
+        self._keys = {}
+        self._predecessor_keys = {}
+        self._successor_list = []
+
+        self._finger_table_start = [None] * (self.size + 1)
+        self._finger_table_start = [(self.id + pow(2, i-1)) %
+                                    self.size for i in range(1, self.size + 1)]
+
+        self._node_finger_table = [None] * (self.size + 1)
+
+        if node_id:
+            node = get_node_instance(node_id)
+            try:
+                self.init_finger_table(node)
+                self.update_others()
+                print(f'\nJoin node {self.id} with {node_id}')
+            except:
+                print(f'\nError: Could not join node {self.id} with {node_id}')
+                return False
+
+        # if is the first node in the ring
+        else:
+            self._node_finger_table = [self.id] * (self.size + 1)
+            print(f'\nJoin the first node {self.id}')
+
+        print_node_info(self)
+        return True

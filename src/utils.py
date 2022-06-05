@@ -23,3 +23,18 @@ def get_proxy(idx):
             return p
         except:
             return None
+
+
+def print_node_info(node):
+    if node is not None:
+        print(f'\nNode {node.id}')
+        print(f'Predecessor: {node.ft_node[0]}')
+        print(f'Successor: {node.ft_node[1]}')
+        print('Finger table:')
+        for i in node.finger_table:
+            print(f'Start {i[0]}   Node {i[1]}')
+
+        print('Keys:')
+        for key in node.keys.keys():
+            for url, _ in node.keys[key]:
+                print(key, url)
