@@ -1,12 +1,16 @@
-import random, time
+import sys
+import random
+import threading
+import time
 import Pyro4
 from typing import Dict
 from utils import hashing, get_node_instance, print_node_info
 
 
+@Pyro4.expose
 class ChordNode:
-    def __init__(self, id, m) -> None:
-        self._id = id
+    def __init__(self, idx, m) -> None:
+        self._id = idx
         self.m = m
         self.size = pow(2, m)
 
@@ -245,7 +249,25 @@ class ChordNode:
         if node:
             self._node_finger_table[i] = node.id
 
+    def update_successor_list(self):
+        while True:
+            try:
+                if not self._successor_list:
+                    if self.successor and self.successor.id != self.id:
+                        self._successor_list.append(self.successor.id)
 
+                elif len(self._successor_list) < self.size:
+                    for i in range(len(self._successor_list)):
+                        succ = get_node_instance(self._successor_list[i])
+                        if succ:
+                            new_succ = succ.successor
+                            if new_succ and new_succ.id != self.id and new_succ not in self._successor_list:
+                                self._successor_list.insert(i+1, new_succ.id)
+                                break
+            except:
+                pass
+
+            time.sleep(1)
 
 
 def stabilize_function(node: ChordNode):
@@ -258,5 +280,61 @@ def stabilize_function(node: ChordNode):
             pass
 
 
+def print_node_function(node):
+    while True:
+        print_node_info(node)
+        time.sleep(10)
 
 
+def main(address, bits, node_address=None):
+    idx = hashing(bits, address)
+
+    node = get_node_instance(idx)
+    if node:
+        print(f'Error: There is another node in the system with the same id, please try another address')
+        return
+
+    host_ip, host_port = address.split(':')
+    try:
+        deamon = Pyro4.Daemon(host=host_ip, port=int(host_port))
+    except:
+        print('Error: There is another node in the system with that address, please try another')
+        return
+
+    node = ChordNode(idx, bits)
+    uri = deamon.register(node)
+    ns = Pyro4.locateNS()
+    ns.register(f'CHORD{idx}', uri)
+
+    request_thread = threading.Thread(target=deamon.requestLoop, deamon=True)
+    request_thread.start()
+
+    if node_address:
+        node_id = hashing(bits, node_address)
+        join_success = node.join(node_id)
+    else:
+        join_success = node.join()
+
+    if not join_success:
+        return
+
+    stabilize_thread = threading.Thread(target=stabilize_function, args=[node])
+    stabilize_thread.start()
+
+    print_tables_thread = threading.Thread(
+        target=print_node_function, args=[node])
+    print_tables_thread.start()
+
+    print_tables_thread = threading.Thread(
+        target=node.update_successor_list, args=[])
+    print_tables_thread.start()
+
+
+if __name__ == '__main__':
+    if len(sys.argv) == 3:
+        main(address=sys.argv[1], bits=int(sys.argv[2]))
+    elif len(sys.argv) == 4:
+        main(address=sys.argv[1], bits=int(
+            sys.argv[3]), node_address=sys.argv[2])
+    else:
+        print('Error: Missing arguments')
