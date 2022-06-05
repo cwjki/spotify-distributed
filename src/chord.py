@@ -3,10 +3,43 @@ from utils import hashing, get_node_instance
 
 
 class ChordNode:
-    def __init__(self, idx, m) -> None:
-        self.idx = idx
+    def __init__(self, id, m) -> None:
+        self._id = id
         self.m = m
         self.size = pow(2, m)
+
+        self._finger_table = []
+        self._succesor_list = []
+
+    @property
+    def id(self):
+        return self._id
+
+    @property
+    def succesor(self):
+        return get_node_instance(self._finger_table[1])
+    
+    @succesor.setter
+    def successor(self, new_node):
+        self._finger_table[1] = new_node
+        self._succesor_list = []
+        
+    @property
+    def predecessor(self):
+        return get_node_instance(self._finger_table[0])
+
+    @predecessor.setter
+    def predecessor(self, new_node):
+        self._finger_table[0] = new_node
+        self._predecessor_keys = self.predecessor.keys
+
+    @property
+    def succesors_list(self):
+        return self._succesor_list
+
+    @property
+    def finger_table(self):
+        return self._finger_table
 
     def in_range(self, key, lwbound, upbound) -> bool:
         '''
