@@ -3,7 +3,6 @@ import random
 import threading
 import time
 import Pyro4
-from typing import Dict
 from utils import hashing, get_node_instance, print_node_info
 
 
@@ -204,8 +203,8 @@ class ChordNode:
         '''
         while self.successor is None:
             if not self._successor_list:
-                # self.successor = self.id
-                # return
+                self.successor = self.id
+                return
             self.successor = self._successor_list.pop(0)
 
         node = self.successor.predecessor
