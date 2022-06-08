@@ -14,10 +14,6 @@ class ChordNode:
         self.m = m
         self.size = pow(2, m)
 
-        self._finger_table = []
-        self._node_finger_table = []
-        self._successor_list = []
-
     @property
     def id(self):
         return self._id
