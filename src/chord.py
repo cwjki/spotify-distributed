@@ -49,8 +49,8 @@ class ChordNode:
         return self._node_finger_table
 
     @property
-    def node_finger_table(self):
-        return [(self._finger_table_start[i], self._node_finger_table[i]) for i in range(1, self.size + 1)]
+    def finger_table(self):
+        return [(self._finger_table_start[i], self._node_finger_table[i]) for i in range(1, self.m + 1)]
 
     @property
     def keys(self):
@@ -79,25 +79,25 @@ class ChordNode:
         else:
             return (lwbound <= key and key < upbound + self.size) or (lwbound <= key + self.size and key < upbound)
 
-    def closest_finger(self, idx) -> 'ChordNode':
+    def closest_preceding_finger(self, idx) -> 'ChordNode':
         '''
-        Return the closest node in the finger table after node idx
+        Return the closest node in the finger table preciding idx
         '''
-        for i in range(self.size, 0, -1):
-            if self.in_range(self._node_finger_table[i], self.id + 1, idx):
+        for i in range(self.m, 0, -1):
+            if self.in_range(self._node_finger_table[i], self._id + 1, idx):
                 node_id = self._node_finger_table[i]
                 return get_node_instance(node_id)
         return self
 
     def find_predecessor(self, idx) -> 'ChordNode':
         '''
-        Find the node predecessor id
+        Ask node n to find idx's predecessor
         '''
         node = self
         temp_node = self
-        while not self.in_range(idx, node.id + 1, node.node_finger_table[1] + 1):
-            node = node.closest_finger(idx)
-            if node is None or node.id == temp_node.id:
+        while not self.in_range(idx, node._id + 1, node.node_finger_table[1] + 1):
+            node = node.closest_preceding_finger(idx)
+            if node is None or node._id == temp_node._id:
                 break
             temp_node = node
         return node
