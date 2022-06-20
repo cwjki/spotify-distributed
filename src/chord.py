@@ -181,18 +181,18 @@ class ChordNode:
         '''
         Update all nodes whose finger table should refer to a local node 
         '''
-        for i in range(1, self.size + 1):
+        for i in range(1, self.m + 1):
             predecessor = self.find_predecessor(
-                (self.id - pow(2, i-1)) % self.size)
-            if predecessor and predecessor.id != self.id:
-                predecessor.update_finger_table(self.id, i)
+                (self._id - pow(2, i-1)) % self.size)
+            if predecessor and predecessor._id != self._id:
+                predecessor.update_finger_table(self._id, i)
 
     def update_finger_table(self, s, i):
         '''
         If s is the ith finger of the local node, update local node 
         finger table with s
         '''
-        if self.in_range(s, self.id, self._finger_table[i]):
+        if self.in_range(s, self._id, self._node_finger_table[i]):
             if i == 1:
                 self.successor = s
             else:
