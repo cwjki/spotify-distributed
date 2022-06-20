@@ -295,21 +295,32 @@ class ChordNode:
         '''
         node = self.lookup(key)
         if node:
-            successor = node.update_key(key, value)
+            success = node.store_key(key, value)
+            if success:
+                node.successor.update_predecessor_key(key, value)
+                print(f'Key {key} was saved in node {node._id}')
+                return True
+        print(f'Error: Could not save key {key} in the system')
+        return False
 
     def store_key(self, key, value):
         '''
-        Update key and value
+        Store key and value
         '''
         try:
-            for k, v in self.keys[key]:
-                if k == value[0]:
-                    return False
             self._keys[key].append(value)
         except:
             self.keys[key] = [value]
-
         return True
+
+    def get_value(self, key):
+        '''
+        Return the value of a key stored in the Chord Ring
+        '''
+        node = self.lookup(key)
+        if node and key in node.keys.keys():
+            return node.keys[key]
+        return None
 
 
 def stabilize_function(node: ChordNode):
