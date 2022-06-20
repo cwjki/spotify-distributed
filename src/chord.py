@@ -44,8 +44,8 @@ class ChordNode:
         return self._node_finger_table
 
     @property
-    def node_finger_table(self):
-        return [(self._finger_table_start[i], self._node_finger_table[i]) for i in range(1, self.size + 1)]
+    def finger_table(self):
+        return [(self._finger_table_start[i], self._node_finger_table[i]) for i in range(1, self.m + 1)]
 
     @property
     def keys(self):
@@ -74,32 +74,32 @@ class ChordNode:
         else:
             return (lwbound <= key and key < upbound + self.size) or (lwbound <= key + self.size and key < upbound)
 
-    def closest_finger(self, idx) -> 'ChordNode':
+    def closest_preceding_finger(self, idx) -> 'ChordNode':
         '''
-        Return the closest node in the finger table after node idx
+        Return the closest node in the finger table preciding idx
         '''
-        for i in range(self.size, 0, -1):
-            if self.in_range(self._node_finger_table[i], self.id + 1, idx):
+        for i in range(self.m, 0, -1):
+            if self.in_range(self._node_finger_table[i], self._id + 1, idx):
                 node_id = self._node_finger_table[i]
                 return get_node_instance(node_id)
         return self
 
     def find_predecessor(self, idx) -> 'ChordNode':
         '''
-        Find the node predecessor id
+        Ask node n to find idx's predecessor
         '''
         node = self
         temp_node = self
-        while not self.in_range(idx, node.id + 1, node.node_finger_table[1] + 1):
-            node = node.closest_finger(idx)
-            if node is None or node.id == temp_node.id:
+        while not self.in_range(idx, node._id + 1, node.node_finger_table[1] + 1):
+            node = node.closest_preceding_finger(idx)
+            if node is None or node._id == temp_node._id:
                 break
             temp_node = node
         return node
 
     def find_successor(self, idx) -> 'ChordNode':
         '''
-        Find the node successor id
+        Ask node n to find idx's successor
         '''
         node = self.find_predecessor(idx)
         return node.successor if node else None
@@ -113,11 +113,11 @@ class ChordNode:
         self._predecessor_keys = {}
         self._successor_list = []
 
-        self._finger_table_start = [None] * (self.size + 1)
-        self._finger_table_start = [(self.id + pow(2, i-1)) %
-                                    self.size for i in range(1, self.size + 1)]
+        self._finger_table_start = [None] * (self.m + 1)
+        self._finger_table_start = [(self._id + pow(2, i-1)) %
+                                    self.size for i in range(1, self.m + 1)]
 
-        self._node_finger_table = [None] * (self.size + 1)
+        self._node_finger_table = [None] * (self.m + 1)
 
         if node_id:
             node = get_node_instance(node_id)
@@ -131,34 +131,34 @@ class ChordNode:
 
         # if is the first node in the ring
         else:
-            self._node_finger_table = [self.id] * (self.size + 1)
-            print(f'\nJoin the first node {self.id}')
+            self._node_finger_table = [self._id] * (self.m + 1)
+            print(f'\nJoin the first node {self._id}')
 
         print_node_info(self)
         return True
 
     def init_finger_table(self, node):
         '''
-        Initialize the local finger table of a node
+        Initialize finger table of local node
         '''
-        self.successor = node.find_successor(self._finger_table_start[1]).id
+        self.successor = node.find_successor(self._finger_table_start[1])._id
         self.predecessor = self.successor.node_finger_table[0]
 
         successor_keys = self.successor.keys.keys()
         for key in successor_keys:
-            if self.in_range(key, self.node_finger_table[0] + 1, self.id + 1):
+            if self.in_range(key, self.node_finger_table[0] + 1, self._id + 1):
                 self.keys[key] = self.successor.pop_key(key)
 
         self.successor.successor.predecessor_keys = self.successor.keys
         self._predecessor_keys = self.predecessor.keys
-        self.successor.predecessor = self.id
+        self.successor.predecessor = self._id
 
-        for i in range(1, self.size):
-            if self.in_range(self._finger_table_start[i+1], self.id, self._node_finger_table[i]):
+        for i in range(1, self.m):
+            if self.in_range(self._finger_table_start[i+1], self._id, self._node_finger_table[i]):
                 self._node_finger_table[i+1] = self.node_finger_table[i]
             else:
                 self._node_finger_table[i+1] = node.find_successor(
-                    self._node_finger_table[i+1]).id
+                    self._finger_table_start[i+1])._id
 
     def pop_key(self, key):
         '''
@@ -166,7 +166,7 @@ class ChordNode:
         '''
         try:
             value = self._keys.pop(key)
-            print(f'Key {key} was deleted in node {self.id}')
+            print(f'Key {key} was deleted in node {self._id}')
             return value
         except KeyError:
             print(f'KeyError: Could not delete key {key} in node {self.id}')
@@ -176,18 +176,18 @@ class ChordNode:
         '''
         Update all nodes whose finger table should refer to a local node 
         '''
-        for i in range(1, self.size + 1):
+        for i in range(1, self.m + 1):
             predecessor = self.find_predecessor(
-                (self.id - pow(2, i-1)) % self.size)
-            if predecessor and predecessor.id != self.id:
-                predecessor.update_finger_table(self.id, i)
+                (self._id - pow(2, i-1)) % self.size)
+            if predecessor and predecessor._id != self._id:
+                predecessor.update_finger_table(self._id, i)
 
     def update_finger_table(self, s, i):
         '''
         If s is the ith finger of the local node, update local node 
         finger table with s
         '''
-        if self.in_range(s, self.id, self._finger_table[i]):
+        if self.in_range(s, self._id, self._node_finger_table[i]):
             if i == 1:
                 self.successor = s
             else:
