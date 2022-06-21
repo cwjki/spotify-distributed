@@ -3,15 +3,19 @@
 {% block content %} 
     <div class="container">
         <div class="page-header">
-            <h1>Canciones Disponibles</h1>
             {% if content[0] == 'gender'  %}
+                <h1>Canciones filtradas por género</h1>
                 <h2><small>Género: "{{ content[1] }}"</small></h2>
             {% elif content[0] == 'author' %}
+                <h1>Canciones filtradas por autor</h1>
                 <h2><small>Autor: "{{ content[1] }}"</small></h2>
+            {% elif content[0] == 'title' %}
+                <h1>Canciones filtradas por título</h1>
+                <h2><small>Título: "{{ content[1] }}"</small></h2>
             {% else %}
-                <h2><small>Todas las canciones"</small></h2>
+                <h1>Todas las canciones disponibles</h1>
             {% endif %}
-            <h2><small>Cantidad de documentos recuperados: {{ content[2] }}</small></h2>
+            <h2><small>Cantidad de canciones: {{ content[2] }}</small></h2>
         </div>
     </div>
     
