@@ -74,6 +74,17 @@ class SpotifyNode:
 
             time.sleep(1)
 
+    def print_node_info(self):
+        '''
+        Print all the node data
+        '''
+        while True:
+            print(f'\nAddress: {self.address}')
+            print(f'Chord node: {self.chord_id}')
+            print(f'Chord node successors list: {self.chord_successors_list}')
+            print(f'Spotify nodes list: {self.spotify_nodes_list}')
+            time.sleep(10)
+
 
 def main(address, spotify_address, chord_address, bits):
     host_ip, host_port = address.split(':')
@@ -99,6 +110,9 @@ def main(address, spotify_address, chord_address, bits):
         spotify_nodes_list_thread = threading.Thread(
             target=spotify_node.update_spotify_nodes_list)
         spotify_nodes_list_thread.start()
+
+        print_thread = threading.Thread(target=spotify_node.print_node_info)
+        print_thread.start()
 
     else:
         print(
