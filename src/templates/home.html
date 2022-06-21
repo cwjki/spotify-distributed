@@ -1,0 +1,76 @@
+{%- extends "base.html" %}
+{% block title %} SRI Search Page {% endblock %}
+
+
+{% block content %}
+    
+    <div class="container">
+        <div class="page-header">
+            <h2>HOME PAGE <small>(blah blah)</small></h2>
+        </div>
+
+        <div class="list-group">
+            <a href="/vsm" class="list-group-item list-group-item-primary active">
+                <h4 class="list-group-item-heading">Modelo Vectorial Clásico</h4>
+                <p class="list-group-item-text"> - utiliza la colección Cranfield</p>
+                <p class="list-group-item-text"> - implementado por los integrantes del equipo</p>
+                <p class="list-group-item-text"> - el modelo vectorial se basa en el grado de similaridad de una consulta dada por el usuario con respecto a los documentos de la colección cuyos términos fueron ponderados mediante TF-IDF (frecuencia de término y frecuencia inversa del documento) .</p>
+                <p class="list-group-item-text"> - correspondencia parcial entre documentos y consulta: Sí</p>
+                <p class="list-group-item-text"> - ranking de documentos recuperados: Sí</p>
+
+            </a>
+        </div>
+
+        <div class="list-group">
+            <a href="/boolean" class="list-group-item list-group-item-success active">
+                <h4 class="list-group-item-heading">Modelo Booleano Clásico</h4>
+                <p class="list-group-item-text"> - utiliza la colección MED</p>
+                <p class="list-group-item-text"> - implementado por los integrantes del equipo</p>
+                <p class="list-group-item-text"> - este modelo se basa en la Lógica Booleana y la Teoría de Conjuntos en el cual ambos, los documentos a buscar y la consulta del usuario, son concebidos como un conjunto de términos. La recuperación está fundamentada en si los documentos contienen o no los términos de la consulta.</p>
+                <p class="list-group-item-text"> - correspondencia parcial entre documentos y consulta: No</p>
+                <p class="list-group-item-text"> - ranking de documentos recuperados: Sí</p>
+            </a>
+        </div>
+
+        <div class="list-group">
+            <a href="/tf" class="list-group-item list-group-item-warning active">
+                <h4 class="list-group-item-heading">Modelo TF</h4>
+                <p class="list-group-item-text"> - utiliza la colección MED</p>
+                <p class="list-group-item-text"> - implementado por los integrantes del equipo</p>
+                <p class="list-group-item-text"> - este modelo se basa solo en la frecuencia de término para clasificar la relevancia de un documento dada una consulta del usuario </p>
+                <p class="list-group-item-text"> - correspondencia parcial entre documentos y consulta: Sí</p>
+                <p class="list-group-item-text"> - ranking de documentos recuperados: Sí</p>
+            </a>
+        </div>
+
+        <div class="list-group">
+            <a href="/tf-idf" class="list-group-item list-group-item-info active">
+                <h4 class="list-group-item-heading">Modelo TF-IDF</h4>
+                <p class="list-group-item-text"> - utiliza la colección MED</p>
+                <p class="list-group-item-text"> - la implementación se apoya en la biblioteca gensim (gensim.models.tfidfmodel.TfidfModel)</p>
+                <p class="list-group-item-text"> - este modelo se basa en la frecuencia de término y la frecuencia de documento inversa para clasificar la relevancia de un documento dada una consulta del usuario </p>
+                <p class="list-group-item-text"> - link de referencia: https://radimrehurek.com/gensim/models/tfidfmodel.html</p>
+                <p class="list-group-item-text"> - correspondencia parcial entre documentos y consulta: Sí</p>
+                <p class="list-group-item-text"> - ranking de documentos recuperados: Sí</p>
+            </a>
+        </div>
+
+        <div class="list-group">
+            <a href="/lem" class="list-group-item list-group-item-danger active">
+                <h4 class="list-group-item-heading">Modelo LogEntropy</h4>
+                <p class="list-group-item-text"> - utiliza la colección MED</p>
+                <p class="list-group-item-text"> - la implementación se apoya en la biblioteca gensim (gensim.models.logentropy_model.LogEntropyModel)</p> 
+                <p class="list-group-item-text"> - el modelo Log Entropy produce una representación de frecuencias de términos logarítmicas ponderada por entropía.
+                                                   El estudio empírico de Lee et al. 2015 1 sugiere que el modelo ponderado por entropía logarítmica produce mejores resultados que otras formas de representación.</p>
+                <p class="list-group-item-text"> - link de referencia: https://radimrehurek.com/gensim/models/logentropy_model.html</p>
+                <p class="list-group-item-text"> - correspondencia parcial entre documentos y consulta: Sí</p>
+                <p class="list-group-item-text"> - ranking de documentos recuperados: Sí</p>
+            </a>
+        </div>
+    
+
+    </div>
+
+    
+
+{% endblock %}
