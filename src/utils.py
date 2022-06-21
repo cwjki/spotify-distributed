@@ -31,7 +31,7 @@ def print_node_info(node):
         print(f'Predecessor: {node.node_finger_table[0]}')
         print(f'Successor: {node.node_finger_table[1]}')
         print('Finger table:')
-        for i in node.node_finger_table:
+        for i in node.finger_table:
             print(f'Start {i[0]}   Node {i[1]}')
 
         print('Keys:')

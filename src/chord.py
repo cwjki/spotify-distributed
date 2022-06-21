@@ -119,8 +119,9 @@ class ChordNode:
         self._successor_list = []
 
         self._finger_table_start = [None] * (self.m + 1)
-        self._finger_table_start = [(self._id + pow(2, i-1)) %
-                                    self.size for i in range(1, self.m + 1)]
+
+        for i in range(1, self.m + 1):
+            self._finger_table_start[i] = (self._id + pow(2, i-1)) % self.size
 
         self._node_finger_table = [None] * (self.m + 1)
 
@@ -359,7 +360,7 @@ def main(address, bits, node_address=None):
     ns = Pyro4.locateNS()
     ns.register(f'CHORD{idx}', uri)
 
-    request_thread = threading.Thread(target=deamon.requestLoop, deamon=True)
+    request_thread = threading.Thread(target=deamon.requestLoop)
     request_thread.start()
 
     if node_address:
@@ -369,6 +370,7 @@ def main(address, bits, node_address=None):
         join_success = node.join()
 
     if not join_success:
+        print('Error: The node was not sucessfully joined to the system')
         return
 
     stabilize_thread = threading.Thread(target=stabilize_function, args=[node])
