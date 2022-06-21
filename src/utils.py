@@ -11,8 +11,12 @@ def hashing(bits, string):
         return None
 
 
-def get_node_instance(idx):
+def get_chord_node_instance(idx):
     return get_proxy(f'CHORD{idx}')
+
+
+def get_spotify_node_instance(idx):
+    return get_proxy(f'SPOTIFY{idx}')
 
 
 def get_proxy(idx):
