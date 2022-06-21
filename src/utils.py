@@ -12,11 +12,11 @@ def hashing(bits, string):
 
 
 def get_node_instance(idx):
-    return get_proxy(f'CHORD:{idx}')
+    return get_proxy(f'CHORD{idx}')
 
 
 def get_proxy(idx):
-    Pyro4.Proxy(f'PYRONAME:{idx}')
+    proxy = Pyro4.Proxy(f'PYRONAME:{idx}')
     with Pyro4.Proxy(f'PYRONAME:{idx}') as p:
         try:
             p._pyroBind()
@@ -26,15 +26,14 @@ def get_proxy(idx):
 
 
 def print_node_info(node):
-    if node is not None:
-        print(f'\nNode {node.id}')
-        print(f'Predecessor: {node.ft_node[0]}')
-        print(f'Successor: {node.ft_node[1]}')
+    if node:
+        print(f'\nNode {node._id}')
+        print(f'Predecessor: {node.node_finger_table[0]}')
+        print(f'Successor: {node.node_finger_table[1]}')
         print('Finger table:')
         for i in node.finger_table:
             print(f'Start {i[0]}   Node {i[1]}')
 
         print('Keys:')
-        for key in node.keys.keys():
-            for url, _ in node.keys[key]:
-                print(key, url)
+        for key, value in node.keys.keys():
+            print(key, value)
