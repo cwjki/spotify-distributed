@@ -1,8 +1,8 @@
 import sys
 import threading
-from urllib import request
+import time
 import Pyro4
-from utils import hashing, get_spotify_node_instance
+from utils import get_chord_node_instance, hashing, get_spotify_node_instance
 
 
 @Pyro4.expose
@@ -24,6 +24,10 @@ class SpotifyNode:
             self._spotify_nodes_list.append(address)
 
     def join(self, spotify_address):
+        '''
+        If spotify node was successfully joined return True
+        else False
+        '''
         self._spotify_nodes_list = [self.address]
         if spotify_address:
             node = get_spotify_node_instance(spotify_address)
@@ -43,6 +47,33 @@ class SpotifyNode:
                 return False
         return True
 
+    def update_spotify_nodes_list(self):
+        '''
+        Periodically check if a spotify node is down and remove it 
+        from the spotify_node_list.
+        '''
+        while True:
+            spotify_nodes = self.spotify_nodes_list
+            for addr in spotify_nodes:
+                node = get_spotify_node_instance(addr)
+                if not node:
+                    self._spotify_nodes_list.remove(addr)
+            time.sleep(1)
+
+    def update_chord_successor_list(self):
+        '''
+        Periodically update the chord successor list
+        '''
+        while True:
+            node = get_chord_node_instance(self.chord_id)
+            if node:
+                try:
+                    self.chord_successors_list = node.successor_list
+                except:
+                    pass
+
+            time.sleep(1)
+
 
 def main(address, spotify_address, chord_address, bits):
     host_ip, host_port = address.split(':')
@@ -60,6 +91,14 @@ def main(address, spotify_address, chord_address, bits):
     if spotify_node.join(spotify_address):
         request_thread = threading.Thread(target=deamon.requestLoop)
         request_thread.start()
+
+        chord_successor_list_thread = threading.Thread(
+            target=spotify_node.update_chord_successor_list)
+        chord_successor_list_thread.start()
+
+        spotify_nodes_list_thread = threading.Thread(
+            target=spotify_node.update_spotify_nodes_list)
+        spotify_nodes_list_thread.start()
 
     else:
         print(
