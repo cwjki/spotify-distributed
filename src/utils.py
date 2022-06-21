@@ -12,11 +12,11 @@ def hashing(bits, string):
 
 
 def get_node_instance(idx):
-    return get_proxy(f'CHORD:{idx}')
+    return get_proxy(f'CHORD{idx}')
 
 
 def get_proxy(idx):
-    Pyro4.Proxy(f'PYRONAME:{idx}')
+    proxy = Pyro4.Proxy(f'PYRONAME:{idx}')
     with Pyro4.Proxy(f'PYRONAME:{idx}') as p:
         try:
             p._pyroBind()

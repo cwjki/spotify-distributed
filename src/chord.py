@@ -3,7 +3,6 @@ import random
 import threading
 import time
 import Pyro4
-from typing import Dict
 from utils import hashing, get_node_instance, print_node_info
 
 
@@ -147,8 +146,11 @@ class ChordNode:
         '''
         Initialize finger table of local node
         '''
+        print(f'NODE -> {node}')
         self.successor = node.find_successor(self._finger_table_start[1])._id
+        print(f'SUCESSOR -> {self.successor}')
         self.predecessor = self.successor.node_finger_table[0]
+        print(f'PREDECESSOR -> {self.predecessor}')
 
         successor_keys = self.successor.keys.keys()
         for key in successor_keys:
@@ -361,6 +363,7 @@ def main(address, bits, node_address=None):
     ns.register(f'CHORD{idx}', uri)
 
     request_thread = threading.Thread(target=deamon.requestLoop)
+    request_thread.daemon = True
     request_thread.start()
 
     if node_address:
