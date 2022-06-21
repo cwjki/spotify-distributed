@@ -4,18 +4,37 @@ from flask_bootstrap import Bootstrap
 app = Flask(__name__)
 Bootstrap(app)
 
+toy_data = [
+    (
+        'Under Pressure',
+        'Shawn Mendes',
+        'Pop'
+    ),
+    (
+        'Cita con ángeles',
+        'Silvio Rodríguez',
+        'Trova'
+    ),
+
+]
+
 
 @app.route("/", methods=['GET'])
 def home():
     return render_template('home.html')
 
 
-@app.route("/all-songs", methods=['GET'])
+@app.route("/all-songs", methods=['GET', 'POST'])
 def all_songs():
-    flag = 'songs'
-    metadata = 'todas las canciones'
-    data = []
-    return render_template('result.html', content=[flag, metadata, data])
+    if request.method == 'POST':
+        
+        song = None
+        return render_template('music_player.html', content=[song])
+    else:
+        flag = 'songs'
+        metadata = 'todas las canciones'
+        data = toy_data
+        return render_template('result.html', content=[flag, metadata, data])
 
 
 @app.route("/upload-song", methods=['GET', 'POST'])
@@ -64,6 +83,7 @@ def search_by_author():
         return render_template('result.html', content=[flag, metadata, data])
     else:
         return render_template('search_by_author.html')
+
 
 
 if __name__ == "__main__":

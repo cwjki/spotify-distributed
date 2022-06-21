@@ -15,8 +15,23 @@
             {% else %}
                 <h1>Todas las canciones disponibles</h1>
             {% endif %}
-            <h2><small>Cantidad de canciones: {{ content[2] }}</small></h2>
+            <h2><small>Cantidad de canciones: {{ 2 }}</small></h2>
         </div>
+
+        {% for song in content[2] %}
+        <form action="#" method="post">
+            <ul class="list-group">
+                <li class="list-group-item active">
+                    <h4 class="list-group-item-heading">{{ song[0] }} &nbsp &nbsp <small>{{ song[1] }} &nbsp &nbsp {{ song[2] }} </small>
+                        &nbsp &nbsp &nbsp &nbsp <button type="submit" class="btn btn-info">Reproducir</button>
+                    </h4>
+                    
+                </li>
+            </ul>
+        {% endfor %}
+        </form>
+        
+
     </div>
     
     
