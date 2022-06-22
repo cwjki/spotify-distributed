@@ -79,7 +79,7 @@ class ChordNode:
         Return the closest node in the finger table preciding idx
         '''
         for i in range(self.m, 0, -1):
-            if self.in_range(self._node_finger_table[i], self._id + 1, idx):
+            if self.in_range(self._node_finger_table[i], self.id + 1, idx):
                 node_id = self._node_finger_table[i]
                 return get_chord_node_instance(node_id)
         return self
@@ -90,9 +90,9 @@ class ChordNode:
         '''
         node = self
         temp_node = self
-        while not self.in_range(idx, node._id + 1, node.node_finger_table[1] + 1):
+        while not self.in_range(idx, node.id + 1, node.node_finger_table[1] + 1):
             node = node.closest_preceding_finger(idx)
-            if node is None or node._id == temp_node._id:
+            if not node or node.id == temp_node.id:
                 break
             temp_node = node
         return node
@@ -125,6 +125,7 @@ class ChordNode:
             try:
                 self.init_finger_table(node)
                 self.update_others()
+
                 print(f'\nJoin node {self.id} with {node_id}')
             except:
                 print(f'\nError: Could not join node {self.id} with {node_id}')
@@ -142,27 +143,24 @@ class ChordNode:
         '''
         Initialize finger table of local node
         '''
-        print(f'NODE -> {node}')
-        self.successor = node.find_successor(self._finger_table_start[1])._id
-        print(f'SUCESSOR -> {self.successor}')
+        self.successor = node.find_successor(self._finger_table_start[1]).id
         self.predecessor = self.successor.node_finger_table[0]
-        print(f'PREDECESSOR -> {self.predecessor}')
 
         successor_keys = self.successor.keys.keys()
         for key in successor_keys:
-            if self.in_range(key, self.node_finger_table[0] + 1, self._id + 1):
+            if self.in_range(key, self.node_finger_table[0] + 1, self.id + 1):
                 self.keys[key] = self.successor.pop_key(key)
 
         self.successor.successor.predecessor_keys = self.successor.keys
         self._predecessor_keys = self.predecessor.keys
-        self.successor.predecessor = self._id
+        self.successor.predecessor = self.id
 
         for i in range(1, self.m):
-            if self.in_range(self._finger_table_start[i+1], self._id, self._node_finger_table[i]):
+            if self.in_range(self._finger_table_start[i+1], self.id, self._node_finger_table[i]):
                 self._node_finger_table[i+1] = self.node_finger_table[i]
             else:
                 self._node_finger_table[i+1] = node.find_successor(
-                    self._finger_table_start[i+1])._id
+                    self._finger_table_start[i+1]).id
 
     def pop_key(self, key):
         '''
@@ -182,22 +180,22 @@ class ChordNode:
         '''
         for i in range(1, self.m + 1):
             predecessor = self.find_predecessor(
-                (self._id - pow(2, i-1)) % self.size)
-            if predecessor and predecessor._id != self._id:
-                predecessor.update_finger_table(self._id, i)
+                (self.id - pow(2, i-1)) % self.size)
+            if predecessor and predecessor.id != self.id:
+                predecessor.update_finger_table(self.id, i)
 
     def update_finger_table(self, s, i):
         '''
         If s is the ith finger of the local node, update local node 
         finger table with s
         '''
-        if self.in_range(s, self._id, self._node_finger_table[i]):
+        if self.in_range(s, self.id, self._node_finger_table[i]):
             if i == 1:
                 self.successor = s
             else:
                 self._node_finger_table[i] = s
             predecessor = self.predecessor
-            if predecessor and predecessor._id != s:
+            if predecessor and predecessor.id != s:
                 predecessor.update_finger_table(s, i)
 
     def stabilize(self):
@@ -364,9 +362,10 @@ def main(address, bits, node_address=None):
     idx = hashing(bits, address)
 
     node = get_chord_node_instance(idx)
-    if node:
-        print(f'Error: There is another node in the system with the same id, please try another address')
-        return
+    # print(node)
+    # if node:
+    #     print(f'Error: There is another node in the system with the same id, please try another address')
+    #     return
 
     host_ip, host_port = address.split(':')
     try:
@@ -376,8 +375,8 @@ def main(address, bits, node_address=None):
         return
 
     node = ChordNode(idx, bits)
-    uri = deamon.register(node)
     ns = Pyro4.locateNS()
+    uri = deamon.register(node)
     ns.register(f'CHORD{idx}', uri)
 
     request_thread = threading.Thread(target=deamon.requestLoop)
@@ -385,7 +384,9 @@ def main(address, bits, node_address=None):
     request_thread.start()
 
     if node_address:
+        print(node_address)
         node_id = hashing(bits, node_address)
+        print(f'node_id{node_id}')
         join_success = node.join(node_id)
     else:
         join_success = node.join()
