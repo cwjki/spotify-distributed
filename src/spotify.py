@@ -140,6 +140,66 @@ class SpotifyNode:
                         f'Error: Could not connect with chord node {self.chord_id}')
                     break
 
+    def get_songs_by_title(self, title):
+        songs = []
+
+        while True:
+            chord_node = get_chord_node_instance(self.chord_id)
+            if not chord_node:
+                chord_node = self.change_chord_node()
+
+            try:
+                all_songs = chord_node.get_all_data()
+                songs = [song for song in all_songs if song[0] == title]
+                return songs
+
+            except:
+                if not self.chord_successors_list:
+                    print(
+                        f'Error: Could not connect with chord node {self.chord_id}')
+                    break
+        return songs
+
+    def get_songs_by_author(self, author):
+        songs = []
+
+        while True:
+            chord_node = get_chord_node_instance(self.chord_id)
+            if not chord_node:
+                chord_node = self.change_chord_node()
+
+            try:
+                all_songs = chord_node.get_all_data()
+                songs = [song for song in all_songs if song[1] == author]
+                return songs
+
+            except:
+                if not self.chord_successors_list:
+                    print(
+                        f'Error: Could not connect with chord node {self.chord_id}')
+                    break
+        return songs
+
+    def get_songs_by_gender(self, gender):
+        songs = []
+
+        while True:
+            chord_node = get_chord_node_instance(self.chord_id)
+            if not chord_node:
+                chord_node = self.change_chord_node()
+
+            try:
+                all_songs = chord_node.get_all_data()
+                songs = [song for song in all_songs if song[2] == gender]
+                return songs
+
+            except:
+                if not self.chord_successors_list:
+                    print(
+                        f'Error: Could not connect with chord node {self.chord_id}')
+                    break
+        return songs
+
 
 def main(address, spotify_address, chord_address, bits):
     host_ip, host_port = address.split(':')
