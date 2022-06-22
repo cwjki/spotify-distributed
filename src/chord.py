@@ -296,25 +296,30 @@ class ChordNode:
         '''
         node = self.lookup(key)
         if node:
-            success = node.store_key(key, value)
-            if success:
-                node.successor.update_predecessor_key(key, value)
-                print(f'AQUI Key {key} was saved in node {node.id}')
-                return True
+            new_key, new_value = self.process_key_value(key, value)
+            self._keys[new_key] = new_value
+            node.successor.update_predecessor_key(new_key, new_value)
+            print(f'Key with hash {key} was saved in node {node.id}')
+            return True
         print(f'Error: Could not save key {key} in the system')
         return False
 
-    def store_key(self, hashx, value):
-        '''
-        Store key and value
-        '''
-        key = value[0] + value[1]
-        self._keys[key] = (hashx, value[0], value[1], value[2], value[3])
-        # try:
-        #     self._keys[key].append(value)
-        # except:
-        #     self.keys[key] = [value]
-        return True
+    def process_key_value(self, key, value):
+        new_key = value[0] + value[1]
+        new_value = (key, value[0], value[1], value[2], value[3])
+        return new_key, new_value
+
+    # def store_key(self, hashx, value):
+    #     '''
+    #     Store key and value
+    #     '''
+    #     key = value[0] + value[1]
+    #     self._keys[key] = (hashx, value[0], value[1], value[2], value[3])
+    #     # try:
+    #     #     self._keys[key].append(value)
+    #     # except:
+    #     #     self.keys[key] = [value]
+    #     return True
 
     def get_value(self, key):
         '''
