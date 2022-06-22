@@ -175,7 +175,7 @@ class SpotifyNode:
         songs = [song for song in all_songs if song[1] == author]
         return songs
 
-    def get_songs_by_author(self, gender):
+    def get_songs_by_gender(self, gender):
         '''
         Filter the available songs by gender
         '''
