@@ -20,14 +20,13 @@ def get_spotify_node_instance(idx):
 
 
 def get_proxy(idx):
-    proxy = Pyro4.Proxy(f'PYRONAME:{idx}')
-    return proxy
-    # with Pyro4.Proxy(f'PYRONAME:{idx}') as p:
-    #     try:
-    #         p._pyroBind()
-    #         return p
-    #     except:
-    #         return None
+    Pyro4.Proxy(f'PYRONAME:{idx}')
+    with Pyro4.Proxy(f'PYRONAME:{idx}') as p:
+        try:
+            p._pyroBind()
+            return p
+        except:
+            return None
 
 
 def print_node_info(node):
