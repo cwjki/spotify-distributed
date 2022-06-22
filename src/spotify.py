@@ -1,8 +1,8 @@
+from random import randint
 import sys
 import threading
 import time
 import Pyro4
-from chord import ChordNode
 from utils import get_chord_node_instance, hashing, get_spotify_node_instance
 
 
@@ -12,9 +12,8 @@ class SpotifyNode:
         self.address = address
         self.chord_id = hashing(m, chord_address)
         self.chord_successors_list = []
-        self.m = m
-
         self._spotify_nodes_list = []
+        self.m = m
 
     @property
     def spotify_nodes_list(self):
@@ -75,18 +74,10 @@ class SpotifyNode:
 
             time.sleep(1)
 
-    def print_node_info(self):
-        '''
-        Print all the node data
-        '''
-        while True:
-            print(f'\nAddress: {self.address}')
-            print(f'Chord node: {self.chord_id}')
-            print(f'Chord node successors list: {self.chord_successors_list}')
-            print(f'Spotify nodes list: {self.spotify_nodes_list}')
-            time.sleep(10)
-
     def change_chord_node(self):
+        '''
+        Try to change the chord id, to reconnect with another chord node
+        '''
         for idx in self.chord_successors_list:
             node = get_chord_node_instance(idx)
             if node:
@@ -95,6 +86,9 @@ class SpotifyNode:
         return None
 
     def get_song(self, song_key):
+        '''
+        Return a song store in the Chord Ring given a song_key
+        '''
         song = None
         while True:
             chord_node = get_chord_node_instance(self.chord_id)
@@ -119,6 +113,9 @@ class SpotifyNode:
         return song
 
     def save_song(self, song_key, song_value):
+        '''
+        Save a song in the Chord Ring
+        '''
         while True:
             chord_node = get_chord_node_instance(self.chord_id)
             if not chord_node:
@@ -140,8 +137,11 @@ class SpotifyNode:
                         f'Error: Could not connect with chord node {self.chord_id}')
                     break
 
-    def get_songs_by_title(self, title):
-        songs = []
+    def get_all_songs(self):
+        '''
+        Return all the songs available in the Chord Ring
+        '''
+        all_songs = []
 
         while True:
             chord_node = get_chord_node_instance(self.chord_id)
@@ -150,55 +150,56 @@ class SpotifyNode:
 
             try:
                 all_songs = chord_node.get_all_data()
-                songs = [song for song in all_songs if song[0] == title]
-                return songs
+                return all_songs
 
             except:
                 if not self.chord_successors_list:
                     print(
                         f'Error: Could not connect with chord node {self.chord_id}')
                     break
+        return all_songs
+
+    def get_songs_by_title(self, title):
+        '''
+        Filter the available songs by title
+        '''
+        all_songs = self.get_all_songs()
+        songs = [song for song in all_songs if song[0] == title]
         return songs
 
     def get_songs_by_author(self, author):
-        songs = []
-
-        while True:
-            chord_node = get_chord_node_instance(self.chord_id)
-            if not chord_node:
-                chord_node = self.change_chord_node()
-
-            try:
-                all_songs = chord_node.get_all_data()
-                songs = [song for song in all_songs if song[1] == author]
-                return songs
-
-            except:
-                if not self.chord_successors_list:
-                    print(
-                        f'Error: Could not connect with chord node {self.chord_id}')
-                    break
+        '''
+        Filter the available songs by author
+        '''
+        all_songs = self.get_all_songs()
+        songs = [song for song in all_songs if song[1] == author]
         return songs
 
-    def get_songs_by_gender(self, gender):
-        songs = []
-
-        while True:
-            chord_node = get_chord_node_instance(self.chord_id)
-            if not chord_node:
-                chord_node = self.change_chord_node()
-
-            try:
-                all_songs = chord_node.get_all_data()
-                songs = [song for song in all_songs if song[2] == gender]
-                return songs
-
-            except:
-                if not self.chord_successors_list:
-                    print(
-                        f'Error: Could not connect with chord node {self.chord_id}')
-                    break
+    def get_songs_by_author(self, gender):
+        '''
+        Filter the available songs by gender
+        '''
+        all_songs = self.get_all_songs()
+        songs = [song for song in all_songs if song[2] == gender]
         return songs
+
+    def choose_spotify_node(self):
+        '''
+        Return one random spotify node, util to balance load
+        '''
+        index = randint(0, len(self._spotify_nodes_list) - 1)
+        return self._spotify_nodes_list[index]
+
+    def print_node_info(self):
+        '''
+        Print all the node data
+        '''
+        while True:
+            print(f'\nAddress: {self.address}')
+            print(f'Chord node: {self.chord_id}')
+            print(f'Chord node successors list: {self.chord_successors_list}')
+            print(f'Spotify nodes list: {self.spotify_nodes_list}')
+            time.sleep(10)
 
 
 def main(address, spotify_address, chord_address, bits):

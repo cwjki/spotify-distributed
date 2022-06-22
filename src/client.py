@@ -2,6 +2,9 @@ import sys
 from flask import Flask, request, render_template
 from flask_bootstrap import Bootstrap
 from utils import get_spotify_node_instance
+from spotify import SpotifyNode
+
+spotify_node: SpotifyNode = None
 
 app = Flask(__name__)
 Bootstrap(app)
@@ -35,6 +38,7 @@ def all_songs():
     else:
         flag = 'songs'
         metadata = 'todas las canciones'
+        # data = spotify_node.get_all_songs()
         data = toy_data
         return render_template('result.html', content=[flag, metadata, data])
 
@@ -87,18 +91,17 @@ def search_by_author():
         return render_template('search_by_author.html')
 
 
-def main(spotify_address):
+def connect(spotify_address):
     spotify_node = get_spotify_node_instance(spotify_address)
     if not spotify_node:
         print(
             f'Error: Could not connect to spotify node with address: {spotify_address}')
         return
-    
 
 
 if __name__ == "__main__":
     if len(sys.argv) == 2:
-        main(sys.argv[1])
+        connect(sys.argv[1])
     elif len(sys.argv) < 2:
         print('Error: Missing arguments, you must enter the spotify node address')
     else:
