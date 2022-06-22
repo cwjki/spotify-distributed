@@ -323,6 +323,26 @@ class ChordNode:
             return node.keys[key]
         return None
 
+    def get_all_data(self):
+        '''
+        Return all the data store in the Chord Ring
+        '''
+        data = []
+        data.append(self.keys)
+
+        first_node_id = self._id
+        node_id = self.successor._id
+        while node_id != first_node_id:
+            try:
+                successor = self.successor
+                data.append(successor.keys)
+                node_id = successor._id
+            except:
+                print(
+                    f'Error: Trying to get the values in the chord node {self._id}')
+
+        return data
+
 
 def stabilize_function(node: ChordNode):
     while True:

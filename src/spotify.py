@@ -130,7 +130,7 @@ class SpotifyNode:
                     print(
                         f'Error: Could not get the hash for the song key {song_key}')
 
-                success = chord_node.save_key(hashx, song_key)
+                success = chord_node.save_key(hashx, song_value)
                 if success:
                     print(f'Key {song_key} was saved in node {chord_node._id}')
 
