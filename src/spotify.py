@@ -2,6 +2,7 @@ import sys
 import threading
 import time
 import Pyro4
+from chord import ChordNode
 from utils import get_chord_node_instance, hashing, get_spotify_node_instance
 
 
@@ -84,6 +85,60 @@ class SpotifyNode:
             print(f'Chord node successors list: {self.chord_successors_list}')
             print(f'Spotify nodes list: {self.spotify_nodes_list}')
             time.sleep(10)
+
+    def change_chord_node(self):
+        for idx in self.chord_successors_list:
+            node = get_chord_node_instance(idx)
+            if node:
+                self.chord_id = idx
+                return node
+        return None
+
+    def get_song(self, song_key):
+        song = None
+        while True:
+            chord_node = get_chord_node_instance(self.chord_id)
+            if not chord_node:
+                chord_node = self.change_chord_node()
+
+            try:
+                hashx = hashing(self.m, song_key)
+                if not hashx:
+                    print(
+                        f'Error: Could not get the hash for the song key {song_key}')
+                    return song
+
+                song = chord_node.get_value(hashx)
+                return song
+
+            except:
+                if not self.chord_successors_list:
+                    print(
+                        f'Error: Could not connect with chord node {self.chord_id}')
+                    break
+        return song
+
+    def save_song(self, song_key, song_value):
+        while True:
+            chord_node = get_chord_node_instance(self.chord_id)
+            if not chord_node:
+                chord_node = self.change_chord_node()
+
+            try:
+                hashx = hashing(self.m, song_key)
+                if not hashx:
+                    print(
+                        f'Error: Could not get the hash for the song key {song_key}')
+
+                success = chord_node.save_key(hashx, song_key)
+                if success:
+                    print(f'Key {song_key} was saved in node {chord_node._id}')
+
+            except:
+                if not self.chord_successors_list:
+                    print(
+                        f'Error: Could not connect with chord node {self.chord_id}')
+                    break
 
 
 def main(address, spotify_address, chord_address, bits):
