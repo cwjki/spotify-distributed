@@ -68,7 +68,7 @@ class SpotifyNode:
             node = get_chord_node_instance(self.chord_id)
             if node:
                 try:
-                    self.chord_successors_list = node.successor_list
+                    self.chord_successors_list = node.successors_list
                 except:
                     pass
 
@@ -130,7 +130,7 @@ class SpotifyNode:
                 success = chord_node.save_key(hashx, song_value)
                 if success:
                     print(f'Key {song_key} was saved in node {chord_node._id}')
-
+                    return
             except:
                 if not self.chord_successors_list:
                     print(

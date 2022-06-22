@@ -1,10 +1,8 @@
 import sys
 from flask import Flask, request, render_template
 from flask_bootstrap import Bootstrap
-from utils import get_spotify_node_instance
+from utils import get_spotify_node_instance, hashing
 from spotify import SpotifyNode
-
-spotify_node: SpotifyNode = None
 
 app = Flask(__name__)
 Bootstrap(app)
@@ -46,12 +44,19 @@ def all_songs():
 @app.route("/upload-song", methods=['GET', 'POST'])
 def upload_song():
     if request.method == 'POST':
+        print(spotify_node)
+
         title = request.form['title']
         gender = request.form['gender']
         author = request.form['author']
         song = request.form['song']
+
+        song_key = title + author
+        spotify_node.save_song(song_key, (title, author, gender, song))
+
         return render_template('home.html')
     else:
+        print(spotify_node)
         return render_template('upload_song.html')
 
 
@@ -96,12 +101,13 @@ def connect(spotify_address):
     if not spotify_node:
         print(
             f'Error: Could not connect to spotify node with address: {spotify_address}')
-        return
+        return None
+    return spotify_node
 
 
 if __name__ == "__main__":
     if len(sys.argv) == 2:
-        connect(sys.argv[1])
+        spotify_node = connect(sys.argv[1])
     elif len(sys.argv) < 2:
         print('Error: Missing arguments, you must enter the spotify node address')
     else:

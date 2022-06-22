@@ -297,7 +297,7 @@ class ChordNode:
             success = node.store_key(key, value)
             if success:
                 node.successor.update_predecessor_key(key, value)
-                print(f'Key {key} was saved in node {node.id}')
+                print(f'AQUI Key {key} was saved in node {node.id}')
                 return True
         print(f'Error: Could not save key {key} in the system')
         return False
@@ -306,10 +306,11 @@ class ChordNode:
         '''
         Store key and value
         '''
-        try:
-            self._keys[key].append(value)
-        except:
-            self.keys[key] = [value]
+        self._keys[key] = value
+        # try:
+        #     self._keys[key].append(value)
+        # except:
+        #     self.keys[key] = [value]
         return True
 
     def get_value(self, key):

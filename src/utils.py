@@ -40,4 +40,5 @@ def print_node_info(node):
 
         print('Keys:')
         for key, value in node.keys.keys():
-            print(key, value)
+            for title, author, gender, _ in value:
+                print(key, title, author, gender)
