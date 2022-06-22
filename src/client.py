@@ -30,7 +30,6 @@ def home():
 @app.route("/all-songs", methods=['GET', 'POST'])
 def all_songs():
     if request.method == 'POST':
-
         song = None
         return render_template('music_player.html', content=[song])
     else:
@@ -43,8 +42,6 @@ def all_songs():
 @app.route("/upload-song", methods=['GET', 'POST'])
 def upload_song():
     if request.method == 'POST':
-        print(spotify_node)
-
         title = request.form['title']
         gender = request.form['gender']
         author = request.form['author']
@@ -54,7 +51,6 @@ def upload_song():
 
         return render_template('home.html')
     else:
-        print(spotify_node)
         return render_template('upload_song.html')
 
 
@@ -64,7 +60,7 @@ def search_by_title():
         title = request.form['title']
         flag = 'title'
         metadata = title
-        data = []
+        data = spotify_node.get_songs_by_title(title)
         return render_template('result.html', content=[flag, metadata, data])
     else:
         return render_template('search_by_title.html')
@@ -76,7 +72,7 @@ def search_by_gender():
         gender = request.form['gender']
         flag = 'gender'
         metadata = gender
-        data = []
+        data = spotify_node.get_songs_by_gender(gender)
         return render_template('result.html', content=[flag, metadata, data])
     else:
         return render_template('search_by_gender.html')
@@ -88,14 +84,14 @@ def search_by_author():
         author = request.form['author']
         flag = 'author'
         metadata = author
-        data = []
+        data = spotify_node.get_songs_by_author(author)
         return render_template('result.html', content=[flag, metadata, data])
     else:
         return render_template('search_by_author.html')
 
 
 def connect(spotify_address):
-    spotify_node = get_spotify_node_instance(spotify_address)
+    spotify_node: SpotifyNode = get_spotify_node_instance(spotify_address)
     if not spotify_node:
         print(
             f'Error: Could not connect to spotify node with address: {spotify_address}')

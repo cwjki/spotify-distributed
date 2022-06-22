@@ -167,7 +167,7 @@ class SpotifyNode:
         Filter the available songs by title
         '''
         all_songs = self.get_all_songs()
-        songs = [song for song in all_songs if song[1] == title]
+        songs = [song for song in all_songs if song[0] == title]
         return songs
 
     def get_songs_by_author(self, author):
@@ -175,7 +175,7 @@ class SpotifyNode:
         Filter the available songs by author
         '''
         all_songs = self.get_all_songs()
-        songs = [song for song in all_songs if song[2] == author]
+        songs = [song for song in all_songs if song[1] == author]
         return songs
 
     def get_songs_by_gender(self, gender):
@@ -183,7 +183,7 @@ class SpotifyNode:
         Filter the available songs by gender
         '''
         all_songs = self.get_all_songs()
-        songs = [song for song in all_songs if song[3] == gender]
+        songs = [song for song in all_songs if song[2] == gender]
         return songs
 
     def choose_spotify_node(self):
