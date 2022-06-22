@@ -31,7 +31,7 @@ def get_proxy(idx):
 
 def print_node_info(node):
     if node:
-        print(f'\nNode {node._id}')
+        print(f'\nNode {node.id}')
         print(f'Predecessor: {node.node_finger_table[0]}')
         print(f'Successor: {node.node_finger_table[1]}')
         print('Finger table:')
@@ -39,6 +39,6 @@ def print_node_info(node):
             print(f'Start {i[0]}   Node {i[1]}')
 
         print('Keys:')
-        for key, value in node.keys.keys():
-            for title, author, gender, _ in value:
-                print(key, title, author, gender)
+        for _, value in node.keys.items():
+            hashx, title, author, gender, _ = value
+            print(f'hash-{hashx} -> {title}, {author}, {gender}')

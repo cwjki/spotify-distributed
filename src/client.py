@@ -51,8 +51,7 @@ def upload_song():
         author = request.form['author']
         song = request.form['song']
 
-        song_key = title + author
-        spotify_node.save_song(song_key, (title, author, gender, song))
+        spotify_node.save_song(title, (title, author, gender, song))
 
         return render_template('home.html')
     else:

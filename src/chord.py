@@ -232,10 +232,12 @@ class ChordNode:
         '''
         Update the value of a key in predecessor_key dictionary
         '''
-        try:
-            self._predecessor_keys[key].extend(value)
-        except:
-            self._predecessor_keys[key] = value
+        self._predecessor_keys[key] = value
+
+        # try:
+        #     self._predecessor_keys[key].extend(value)
+        # except:
+        #     self._predecessor_keys[key] = value
 
     def fix_fingers(self):
         '''
@@ -302,11 +304,12 @@ class ChordNode:
         print(f'Error: Could not save key {key} in the system')
         return False
 
-    def store_key(self, key, value):
+    def store_key(self, hashx, value):
         '''
         Store key and value
         '''
-        self._keys[key] = value
+        key = value[0] + value[1]
+        self._keys[key] = (hashx, value[0], value[1], value[2], value[3])
         # try:
         #     self._keys[key].append(value)
         # except:

@@ -112,7 +112,7 @@ class SpotifyNode:
                     break
         return song
 
-    def save_song(self, song_key, song_value):
+    def save_song(self, song_title, song_value):
         '''
         Save a song in the Chord Ring
         '''
@@ -122,14 +122,15 @@ class SpotifyNode:
                 chord_node = self.change_chord_node()
 
             try:
-                hashx = hashing(self.m, song_key)
+                hashx = hashing(self.m, song_title)
                 if not hashx:
                     print(
-                        f'Error: Could not get the hash for the song key {song_key}')
+                        f'Error: Could not get the hash for the song key {song_title}')
 
                 success = chord_node.save_key(hashx, song_value)
                 if success:
-                    print(f'Key {song_key} was saved in node {chord_node._id}')
+                    print(
+                        f'Key {song_title} was saved in node {chord_node.id}')
                     return
             except:
                 if not self.chord_successors_list:
