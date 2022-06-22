@@ -1,3 +1,4 @@
+from concurrent.futures import process
 import sys
 import random
 import threading
@@ -234,11 +235,6 @@ class ChordNode:
         '''
         self._predecessor_keys[key] = value
 
-        # try:
-        #     self._predecessor_keys[key].extend(value)
-        # except:
-        #     self._predecessor_keys[key] = value
-
     def fix_fingers(self):
         '''
         Periodically refresh finger table
@@ -334,20 +330,23 @@ class ChordNode:
         '''
         Return all the data store in the Chord Ring
         '''
-        data = []
-        data.append(self.keys)
+        data = self.process_data(self.keys)
 
-        first_node_id = self.id
-        node_id = self.successor.id
-        while node_id != first_node_id:
+        node = self.successor
+        while node.id != self.id:
             try:
-                successor = self.successor
-                data.append(successor.keys)
-                node_id = successor.id
+                data += self.process_data(node.keys)
+                node = node.successor
             except:
                 print(
                     f'Error: Trying to get the values in the chord node {self.id}')
 
+        return data
+
+    def process_data(self, keys):
+        data = []
+        for _, title, author, gender, _ in keys.values():
+            data.append((title, author, gender))
         return data
 
 

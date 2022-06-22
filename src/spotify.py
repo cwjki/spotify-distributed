@@ -150,10 +150,12 @@ class SpotifyNode:
                 chord_node = self.change_chord_node()
 
             try:
+                print("BB")
                 all_songs = chord_node.get_all_data()
                 return all_songs
 
             except:
+                print("AA")
                 if not self.chord_successors_list:
                     print(
                         f'Error: Could not connect with chord node {self.chord_id}')
@@ -165,7 +167,7 @@ class SpotifyNode:
         Filter the available songs by title
         '''
         all_songs = self.get_all_songs()
-        songs = [song for song in all_songs if song[0] == title]
+        songs = [song for song in all_songs if song[1] == title]
         return songs
 
     def get_songs_by_author(self, author):
@@ -173,7 +175,7 @@ class SpotifyNode:
         Filter the available songs by author
         '''
         all_songs = self.get_all_songs()
-        songs = [song for song in all_songs if song[1] == author]
+        songs = [song for song in all_songs if song[2] == author]
         return songs
 
     def get_songs_by_gender(self, gender):
@@ -181,7 +183,7 @@ class SpotifyNode:
         Filter the available songs by gender
         '''
         all_songs = self.get_all_songs()
-        songs = [song for song in all_songs if song[2] == gender]
+        songs = [song for song in all_songs if song[3] == gender]
         return songs
 
     def choose_spotify_node(self):

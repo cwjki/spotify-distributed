@@ -42,8 +42,6 @@ def print_node_info(node):
         print(node.predecessor_keys)
 
         print('Keys:')
-        print(node.keys)
         for _, value in node.keys.items():
             hashx, title, author, gender, _ = value
             print(f'hash-{hashx} -> {title}, {author}, {gender}')
-

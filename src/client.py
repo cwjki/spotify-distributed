@@ -36,8 +36,7 @@ def all_songs():
     else:
         flag = 'songs'
         metadata = 'todas las canciones'
-        # data = spotify_node.get_all_songs()
-        data = toy_data
+        data = spotify_node.get_all_songs()
         return render_template('result.html', content=[flag, metadata, data])
 
 
