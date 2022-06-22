@@ -1,0 +1,50 @@
+{%- extends "base.html" %}
+{% block title %} SRI Search Page {% endblock %}
+
+
+{% block content %}
+    
+    <div class="container">
+        <div class="page-header">
+            <h2>Acciones Disponibles <small>(blah blah)</small></h2>
+        </div>
+
+        <div class="list-group">
+            <a href="/all-songs" class="list-group-item list-group-item-primary active">
+                <h4 class="list-group-item-heading">Listar todas las canciones disponibles</h4>
+            </a>
+        </div>
+
+        <div class="list-group">
+            <a href="/upload-song" class="list-group-item list-group-item-success active">
+                <h4 class="list-group-item-heading">Subir canciones</h4>
+            </a>
+        </div>
+
+        <div class="list-group">
+            <a href="/search-by-title" class="list-group-item list-group-item-warning active">
+                <h4 class="list-group-item-heading">Buscar canciones por título</h4>
+            </a>
+        </div>
+
+        <div class="list-group">
+            <a href="/search-by-gender" class="list-group-item list-group-item-danger active">
+                <h4 class="list-group-item-heading">Buscar canciones por género</h4>
+            </a>
+        </div>
+
+        <div class="list-group">
+            <a href="/search-by-author" class="list-group-item list-group-item-info active">
+                <h4 class="list-group-item-heading">Buscar canciones por autor</h4>
+            </a>
+        </div>
+
+
+
+    
+
+    </div>
+
+    
+
+{% endblock %}

@@ -3,7 +3,7 @@ import random
 import threading
 import time
 import Pyro4
-from utils import hashing, get_node_instance, print_node_info
+from utils import hashing, get_chord_node_instance, print_node_info
 
 
 @Pyro4.expose
@@ -19,7 +19,7 @@ class ChordNode:
 
     @property
     def successor(self):
-        return get_node_instance(self._node_finger_table[1])
+        return get_chord_node_instance(self._node_finger_table[1])
 
     @successor.setter
     def successor(self, new_node):
@@ -28,7 +28,7 @@ class ChordNode:
 
     @property
     def predecessor(self):
-        return get_node_instance(self._node_finger_table[0])
+        return get_chord_node_instance(self._node_finger_table[0])
 
     @predecessor.setter
     def predecessor(self, new_node):
@@ -81,7 +81,7 @@ class ChordNode:
         for i in range(self.m, 0, -1):
             if self.in_range(self._node_finger_table[i], self._id + 1, idx):
                 node_id = self._node_finger_table[i]
-                return get_node_instance(node_id)
+                return get_chord_node_instance(node_id)
         return self
 
     def find_predecessor(self, idx) -> 'ChordNode':
@@ -121,7 +121,7 @@ class ChordNode:
         self._node_finger_table = [None] * (self.m + 1)
 
         if node_id:
-            node = get_node_instance(node_id)
+            node = get_chord_node_instance(node_id)
             try:
                 self.init_finger_table(node)
                 self.update_others()
@@ -257,7 +257,7 @@ class ChordNode:
 
                 elif len(self._successor_list) < self.m:
                     for i in range(len(self._successor_list)):
-                        succ = get_node_instance(self._successor_list[i])
+                        succ = get_chord_node_instance(self._successor_list[i])
                         if succ:
                             new_succ = succ.successor
                             if new_succ and new_succ._id != self._id and new_succ._id not in self._successor_list:
@@ -278,11 +278,13 @@ class ChordNode:
             else:
                 for k in range(1, self.m):
                     if self.in_range(key, self._finger_table_start[k], self._finger_table_start[k + 1]):
-                        node = get_node_instance(self.node_finger_table[k])
+                        node = get_chord_node_instance(
+                            self.node_finger_table[k])
                         if node:
                             return node.lookup(key)
                 else:
-                    node = get_node_instance(self.node_finger_table[self.m])
+                    node = get_chord_node_instance(
+                        self.node_finger_table[self.m])
                     if node:
                         return node.lookup(key)
 
@@ -321,6 +323,26 @@ class ChordNode:
             return node.keys[key]
         return None
 
+    def get_all_data(self):
+        '''
+        Return all the data store in the Chord Ring
+        '''
+        data = []
+        data.append(self.keys)
+
+        first_node_id = self._id
+        node_id = self.successor._id
+        while node_id != first_node_id:
+            try:
+                successor = self.successor
+                data.append(successor.keys)
+                node_id = successor._id
+            except:
+                print(
+                    f'Error: Trying to get the values in the chord node {self._id}')
+
+        return data
+
 
 def stabilize_function(node: ChordNode):
     while True:
@@ -341,7 +363,7 @@ def print_node_function(node):
 def main(address, bits, node_address=None):
     idx = hashing(bits, address)
 
-    node = get_node_instance(idx)
+    node = get_chord_node_instance(idx)
     if node:
         print(f'Error: There is another node in the system with the same id, please try another address')
         return
