@@ -42,6 +42,15 @@ def print_node_info(node):
         print(node.predecessor_keys)
 
         print('Keys:')
-        for _, value in node.keys.items():
+        for key, value in node.keys.items():
             hashx, title, author, gender, _ = value
-            print(f'hash-{hashx} -> {title}, {author}, {gender}')
+            print(f'Key:{key} -> {hashx}, {title}, {author}, {gender}')
+
+
+def get_song_metadata(string: str):
+    string = string[1:-1]
+    string = string.split(', ')
+    title = string[0][1:-1]
+    author = string[1][1:-1]
+    gender = string[2][1:-1]
+    return title, author, gender

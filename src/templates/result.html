@@ -23,9 +23,8 @@
             <ul class="list-group">
                 <li class="list-group-item active">
                     <h4 class="list-group-item-heading">{{ song[0] }} &nbsp &nbsp <small>{{ song[1] }} &nbsp &nbsp {{ song[2] }} </small>
-                        &nbsp &nbsp &nbsp &nbsp <button type="submit" class="btn btn-info">Reproducir</button>
+                        &nbsp &nbsp &nbsp &nbsp <button type="submit" class="btn btn-info" name="song" value="{{song}}">Reproducir</button>
                     </h4>
-                    
                 </li>
             </ul>
         {% endfor %}

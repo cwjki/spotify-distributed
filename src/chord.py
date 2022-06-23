@@ -284,26 +284,25 @@ class ChordNode:
                     if node:
                         return node.lookup(key)
 
-    def save_key(self, key, value):
+    def save_key(self, hashx, key, value):
         '''
         Save a key and its value in the Chord Ring, 
         if operation was successfully return True
         else return False
         '''
-        node = self.lookup(key)
+        node = self.lookup(hashx)
         if node:
-            new_key, new_value = self.process_key_value(key, value)
-            self._keys[new_key] = new_value
-            node.successor.update_predecessor_key(new_key, new_value)
+            new_value = self.add_hash_to_value(hashx, value)
+            self._keys[key] = new_value
+            node.successor.update_predecessor_key(key, new_value)
             print(f'Key with hash {key} was saved in node {node.id}')
             return True
         print(f'Error: Could not save key {key} in the system')
         return False
 
-    def process_key_value(self, key, value):
-        new_key = value[0] + value[1]
-        new_value = (key, value[0], value[1], value[2], value[3])
-        return new_key, new_value
+    def add_hash_to_value(self, hashx, value):
+        new_value = (hashx, value[0], value[1], value[2], value[3])
+        return new_value
 
     # def store_key(self, hashx, value):
     #     '''
@@ -317,11 +316,11 @@ class ChordNode:
     #     #     self.keys[key] = [value]
     #     return True
 
-    def get_value(self, key):
+    def get_value(self, hashx, key):
         '''
         Return the value of a key stored in the Chord Ring
         '''
-        node = self.lookup(key)
+        node = self.lookup(hashx)
         if node and key in node.keys.keys():
             return node.keys[key]
         return None

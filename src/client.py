@@ -1,25 +1,18 @@
+import os
 import sys
 from flask import Flask, request, render_template
 from flask_bootstrap import Bootstrap
-from utils import get_spotify_node_instance, hashing
+from utils import get_song_metadata, get_spotify_node_instance
 from spotify import SpotifyNode
+from werkzeug.utils import secure_filename
+
+UPLOAD_FOLDER = '/static'
+ALLOWED_EXTENSIONS = {'mp3'}
+
 
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = '/tmp'
 Bootstrap(app)
-
-toy_data = [
-    (
-        'Under Pressure',
-        'Shawn Mendes',
-        'Pop'
-    ),
-    (
-        'Cita con ángeles',
-        'Silvio Rodríguez',
-        'Trova'
-    ),
-
-]
 
 
 @app.route("/", methods=['GET'])
@@ -30,7 +23,15 @@ def home():
 @app.route("/all-songs", methods=['GET', 'POST'])
 def all_songs():
     if request.method == 'POST':
-        song = None
+        song = request.form['song']
+        title, author, _ = get_song_metadata(song)
+        song_key = title + ' ' + author
+        song = spotify_node.get_song(song_key)
+        print(type(song[4]))
+
+        with open('/static/track1.mp3', 'wb') as file:
+            file.write(song[4].content)
+
         return render_template('music_player.html', content=[song])
     else:
         flag = 'songs'
@@ -45,9 +46,16 @@ def upload_song():
         title = request.form['title']
         gender = request.form['gender']
         author = request.form['author']
-        song = request.form['song']
+        song_file = request.files['songfile']
 
-        spotify_node.save_song(title, (title, author, gender, song))
+        if song_file and allowed_file(song_file.filename):
+            print("ENTRO")
+            filename = secure_filename(song_file.filename)
+            song_file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            
+
+        song_key = title + ' ' + author
+        # spotify_node.save_song(song_key, (title, author, gender, filename))
 
         return render_template('home.html')
     else:
@@ -99,9 +107,15 @@ def connect(spotify_address):
     return spotify_node
 
 
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
 if __name__ == "__main__":
     if len(sys.argv) == 2:
-        spotify_node = connect(sys.argv[1])
+        pass
+        # spotify_node = connect(sys.argv[1])
     elif len(sys.argv) < 2:
         print('Error: Missing arguments, you must enter the spotify node address')
     else:
