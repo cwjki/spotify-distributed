@@ -1,3 +1,6 @@
+from serpent import tobytes
+from base64 import decode
+from encodings.utf_8 import encode
 import os
 import sys
 from flask import Flask, request, render_template
@@ -5,13 +8,15 @@ from flask_bootstrap import Bootstrap
 from utils import get_song_metadata, get_spotify_node_instance
 from spotify import SpotifyNode
 from werkzeug.utils import secure_filename
+from werkzeug.datastructures import FileStorage
 
-UPLOAD_FOLDER = '/static'
+
+UPLOAD_FOLDER = os.getcwd() + '/static/upload'
 ALLOWED_EXTENSIONS = {'mp3'}
 
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = '/tmp'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 Bootstrap(app)
 
 
@@ -26,11 +31,32 @@ def all_songs():
         song = request.form['song']
         title, author, _ = get_song_metadata(song)
         song_key = title + ' ' + author
-        song = spotify_node.get_song(song_key)
-        print(type(song[4]))
+        song_file = spotify_node.get_song(song_key)
 
-        with open('/static/track1.mp3', 'wb') as file:
-            file.write(song[4].content)
+        print(song_file[0])
+        print(song_file[1])
+        print(song_file[2])
+        print(song_file[4])
+
+        # file = FileStorage(stream=)
+
+        encode_song = tobytes(song_file[4])
+        with open('static/download/track.mp3', 'wb') as file:
+            file.write(encode_song)
+
+        # decoded_song = b64decode(song_file[4]['data'])
+        # print(decoded_song)
+        # file1 = FileStorage(stream=decoded_song)
+        # print(file1)
+        # song_data = base64.decode(song_file[4]['data'], decoded_song)
+        # print(decoded_song)
+
+        # if song_file and allowed_file(song_file.filename):
+        #     filename = secure_filename(song_file.filename)
+        #     song_file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+        # with open('static/track.mp3', 'wb') as file:
+        #     file.write(decoded_song)
 
         return render_template('music_player.html', content=[song])
     else:
@@ -48,17 +74,20 @@ def upload_song():
         author = request.form['author']
         song_file = request.files['songfile']
 
+        song_key = title + ' ' + author
+
         if song_file and allowed_file(song_file.filename):
-            print("ENTRO")
             filename = secure_filename(song_file.filename)
             song_file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            
 
-        song_key = title + ' ' + author
-        # spotify_node.save_song(song_key, (title, author, gender, filename))
+        with open('static/upload/' + filename, 'rb') as file:
+            song_content = file.read()
+
+        spotify_node.save_song(song_key, (title, author, gender, song_content))
 
         return render_template('home.html')
     else:
+
         return render_template('upload_song.html')
 
 
@@ -114,8 +143,7 @@ def allowed_file(filename):
 
 if __name__ == "__main__":
     if len(sys.argv) == 2:
-        pass
-        # spotify_node = connect(sys.argv[1])
+        spotify_node = connect(sys.argv[1])
     elif len(sys.argv) < 2:
         print('Error: Missing arguments, you must enter the spotify node address')
     else:

@@ -38,8 +38,8 @@ def print_node_info(node):
         for i in node.finger_table:
             print(f'Start {i[0]}   Node {i[1]}')
 
-        print('Predecessor Keys')
-        print(node.predecessor_keys)
+        # print('Predecessor Keys')
+        # print(node.predecessor_keys)
 
         print('Keys:')
         for key, value in node.keys.items():

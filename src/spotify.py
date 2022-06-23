@@ -106,6 +106,7 @@ class SpotifyNode:
                     return song
 
                 song = chord_node.get_value(hashx, song_key)
+                print(song)
                 return song
 
             except:
