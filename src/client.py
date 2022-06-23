@@ -1,6 +1,4 @@
 from serpent import tobytes
-from base64 import decode
-from encodings.utf_8 import encode
 import os
 import sys
 from flask import Flask, request, render_template
@@ -8,7 +6,6 @@ from flask_bootstrap import Bootstrap
 from utils import get_song_metadata, get_spotify_node_instance
 from spotify import SpotifyNode
 from werkzeug.utils import secure_filename
-from werkzeug.datastructures import FileStorage
 
 
 UPLOAD_FOLDER = os.getcwd() + '/static/upload'
@@ -33,30 +30,9 @@ def all_songs():
         song_key = title + ' ' + author
         song_file = spotify_node.get_song(song_key)
 
-        print(song_file[0])
-        print(song_file[1])
-        print(song_file[2])
-        print(song_file[4])
-
-        # file = FileStorage(stream=)
-
         encode_song = tobytes(song_file[4])
         with open('static/download/track.mp3', 'wb') as file:
             file.write(encode_song)
-
-        # decoded_song = b64decode(song_file[4]['data'])
-        # print(decoded_song)
-        # file1 = FileStorage(stream=decoded_song)
-        # print(file1)
-        # song_data = base64.decode(song_file[4]['data'], decoded_song)
-        # print(decoded_song)
-
-        # if song_file and allowed_file(song_file.filename):
-        #     filename = secure_filename(song_file.filename)
-        #     song_file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-
-        # with open('static/track.mp3', 'wb') as file:
-        #     file.write(decoded_song)
 
         return render_template('music_player.html', content=[song])
     else:
