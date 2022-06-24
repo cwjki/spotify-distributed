@@ -20,7 +20,7 @@ def get_spotify_node_instance(idx):
 
 
 def get_proxy(idx):
-    proxy = Pyro4.Proxy(f'PYRONAME:{idx}')
+    Pyro4.Proxy(f'PYRONAME:{idx}')
     with Pyro4.Proxy(f'PYRONAME:{idx}') as p:
         try:
             p._pyroBind()
@@ -31,13 +31,26 @@ def get_proxy(idx):
 
 def print_node_info(node):
     if node:
-        print(f'\nNode {node._id}')
+        print(f'\nNode {node.id}')
         print(f'Predecessor: {node.node_finger_table[0]}')
         print(f'Successor: {node.node_finger_table[1]}')
         print('Finger table:')
         for i in node.finger_table:
             print(f'Start {i[0]}   Node {i[1]}')
 
+        # print('Predecessor Keys')
+        # print(node.predecessor_keys)
+
         print('Keys:')
-        for key, value in node.keys.keys():
-            print(key, value)
+        for key, value in node.keys.items():
+            hashx, title, author, gender, _ = value
+            print(f'Key:{key} -> {hashx}, {title}, {author}, {gender}')
+
+
+def get_song_metadata(string: str):
+    string = string[1:-1]
+    string = string.split(', ')
+    title = string[0][1:-1]
+    author = string[1][1:-1]
+    gender = string[2][1:-1]
+    return title, author, gender

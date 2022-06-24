@@ -5,7 +5,7 @@
 {% block content %}
     
     <div class="container">
-        <form action="#" method="post">
+        <form action="#" method="post" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="title">Título</label>
                 <input type="text" class="form-control" id="title" name="title" placeholder="...">
@@ -20,10 +20,10 @@
             </div>
             <div class="form-group">
                 <label for="song">Elegir canción</label>
-                <input type="file" id="song" name="song">
+                <input type="file" id="songfile" name="songfile">
                 <p class="help-block">debe tener formato blah</p>
             </div>
-            <button type="submit" class="btn btn-default" value="submit">Confirmar</button>
+            <button type="submit" class="btn btn-default" value="Upload">Confirmar</button>
         </form>
     </div>
 

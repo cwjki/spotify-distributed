@@ -1,3 +1,5 @@
+from cmath import e
+from concurrent.futures import process
 import sys
 import random
 import threading
@@ -79,7 +81,7 @@ class ChordNode:
         Return the closest node in the finger table preciding idx
         '''
         for i in range(self.m, 0, -1):
-            if self.in_range(self._node_finger_table[i], self._id + 1, idx):
+            if self.in_range(self._node_finger_table[i], self.id + 1, idx):
                 node_id = self._node_finger_table[i]
                 return get_chord_node_instance(node_id)
         return self
@@ -90,9 +92,9 @@ class ChordNode:
         '''
         node = self
         temp_node = self
-        while not self.in_range(idx, node._id + 1, node.node_finger_table[1] + 1):
+        while not self.in_range(idx, node.id + 1, node.node_finger_table[1] + 1):
             node = node.closest_preceding_finger(idx)
-            if node is None or node._id == temp_node._id:
+            if not node or node.id == temp_node.id:
                 break
             temp_node = node
         return node
@@ -116,7 +118,7 @@ class ChordNode:
         self._finger_table_start = [None] * (self.m + 1)
 
         for i in range(1, self.m + 1):
-            self._finger_table_start[i] = (self._id + pow(2, i-1)) % self.size
+            self._finger_table_start[i] = (self.id + pow(2, i-1)) % self.size
 
         self._node_finger_table = [None] * (self.m + 1)
 
@@ -125,15 +127,17 @@ class ChordNode:
             try:
                 self.init_finger_table(node)
                 self.update_others()
+
                 print(f'\nJoin node {self.id} with {node_id}')
-            except:
+            except Exception as error:
+                print(error)
                 print(f'\nError: Could not join node {self.id} with {node_id}')
                 return False
 
         # if is the first node in the ring
         else:
-            self._node_finger_table = [self._id] * (self.m + 1)
-            print(f'\nJoin the first node {self._id}')
+            self._node_finger_table = [self.id] * (self.m + 1)
+            print(f'\nJoin the first node {self.id}')
 
         print_node_info(self)
         return True
@@ -142,27 +146,25 @@ class ChordNode:
         '''
         Initialize finger table of local node
         '''
-        print(f'NODE -> {node}')
-        self.successor = node.find_successor(self._finger_table_start[1])._id
-        print(f'SUCESSOR -> {self.successor}')
+        self.successor = node.find_successor(self._finger_table_start[1]).id
         self.predecessor = self.successor.node_finger_table[0]
-        print(f'PREDECESSOR -> {self.predecessor}')
 
-        successor_keys = self.successor.keys.keys()
-        for key in successor_keys:
-            if self.in_range(key, self.node_finger_table[0] + 1, self._id + 1):
+        successor_keys = self.successor.keys.items()
+        for key, value in successor_keys:
+            hashx, _, _, _, _ = value
+            if self.in_range(hashx, self.node_finger_table[0] + 1, self.id + 1):
                 self.keys[key] = self.successor.pop_key(key)
 
         self.successor.successor.predecessor_keys = self.successor.keys
         self._predecessor_keys = self.predecessor.keys
-        self.successor.predecessor = self._id
+        self.successor.predecessor = self.id
 
         for i in range(1, self.m):
-            if self.in_range(self._finger_table_start[i+1], self._id, self._node_finger_table[i]):
+            if self.in_range(self._finger_table_start[i+1], self.id, self._node_finger_table[i]):
                 self._node_finger_table[i+1] = self.node_finger_table[i]
             else:
                 self._node_finger_table[i+1] = node.find_successor(
-                    self._finger_table_start[i+1])._id
+                    self._finger_table_start[i+1]).id
 
     def pop_key(self, key):
         '''
@@ -170,7 +172,7 @@ class ChordNode:
         '''
         try:
             value = self._keys.pop(key)
-            print(f'Key {key} was deleted in node {self._id}')
+            print(f'Key {key} was deleted in node {self.id}')
             return value
         except KeyError:
             print(f'KeyError: Could not delete key {key} in node {self.id}')
@@ -182,22 +184,22 @@ class ChordNode:
         '''
         for i in range(1, self.m + 1):
             predecessor = self.find_predecessor(
-                (self._id - pow(2, i-1)) % self.size)
-            if predecessor and predecessor._id != self._id:
-                predecessor.update_finger_table(self._id, i)
+                (self.id - pow(2, i-1)) % self.size)
+            if predecessor and predecessor.id != self.id:
+                predecessor.update_finger_table(self.id, i)
 
     def update_finger_table(self, s, i):
         '''
         If s is the ith finger of the local node, update local node 
         finger table with s
         '''
-        if self.in_range(s, self._id, self._node_finger_table[i]):
+        if self.in_range(s, self.id, self._node_finger_table[i]):
             if i == 1:
                 self.successor = s
             else:
                 self._node_finger_table[i] = s
             predecessor = self.predecessor
-            if predecessor and predecessor._id != s:
+            if predecessor and predecessor.id != s:
                 predecessor.update_finger_table(s, i)
 
     def stabilize(self):
@@ -205,15 +207,16 @@ class ChordNode:
         Periodically verify local node's inmediate successor and 
         tell the successor about local node
         '''
-        if self.successor is None:
-            if self._successor_list:
-                self.successor = self._successor_list.pop(0)
+        while self.successor is None:
+            if not self._successor_list:
+                self.successor = self.id
+                return
             else:
-                self.successor = self._id
+                self.successor = self._successor_list.pop(0)
 
         node = self.successor.predecessor
-        if node and self.in_range(node._id, self._id + 1, self._node_finger_table[1]) and ((self._id + 1) % self.size) != self._node_finger_table[1]:
-            self.successor = node._id
+        if node and self.in_range(node.id, self.id + 1, self._node_finger_table[1]) and ((self.id + 1) % self.size) != self._node_finger_table[1]:
+            self.successor = node.id
         if self.successor:
             self.successor.notify(self)
 
@@ -224,20 +227,17 @@ class ChordNode:
         if not self.predecessor:
             for key in self._predecessor_keys.keys():
                 self._keys[key] = self._predecessor_keys[key]
-                if self.successor and self.successor._id != self._id:
+                if self.successor and self.successor.id != self.id:
                     self.successor.update_predecessor_key(key, self._keys[key])
 
-        if not self.predecessor or self.in_range(node._id, self._node_finger_table[0] + 1, self._id):
-            self.predecessor = node._id
+        if not self.predecessor or self.in_range(node.id, self._node_finger_table[0] + 1, self.id):
+            self.predecessor = node.id
 
     def update_predecessor_key(self, key, value):
         '''
         Update the value of a key in predecessor_key dictionary
         '''
-        try:
-            self._predecessor_keys[key].extend(value)
-        except:
-            self._predecessor_keys[key] = value
+        self._predecessor_keys[key] = value
 
     def fix_fingers(self):
         '''
@@ -246,22 +246,22 @@ class ChordNode:
         i = random.randint(2, self.m)
         node = self.find_successor(self._finger_table_start[i])
         if node:
-            self._node_finger_table[i] = node._id
+            self._node_finger_table[i] = node.id
 
     def update_successor_list(self):
         while True:
             try:
                 if not self._successor_list:
-                    if self.successor and self.successor._id != self._id:
-                        self._successor_list.append(self.successor._id)
+                    if self.successor and self.successor.id != self.id:
+                        self._successor_list.append(self.successor.id)
 
                 elif len(self._successor_list) < self.m:
                     for i in range(len(self._successor_list)):
                         succ = get_chord_node_instance(self._successor_list[i])
                         if succ:
                             new_succ = succ.successor
-                            if new_succ and new_succ._id != self._id and new_succ._id not in self._successor_list:
-                                self._successor_list.insert(i+1, new_succ._id)
+                            if new_succ and new_succ.id != self.id and new_succ.id not in self._successor_list:
+                                self._successor_list.insert(i+1, new_succ.id)
                                 break
             except:
                 pass
@@ -273,7 +273,7 @@ class ChordNode:
         Return the node responsible for storing the key
         '''
         while True:
-            if self.in_range(key, self.node_finger_table[0] + 1, self._id + 1):
+            if self.in_range(key, self.node_finger_table[0] + 1, self.id + 1):
                 return self
             else:
                 for k in range(1, self.m):
@@ -288,37 +288,39 @@ class ChordNode:
                     if node:
                         return node.lookup(key)
 
-    def save_key(self, key, value):
+    def save_key(self, hashx, key, value):
         '''
         Save a key and its value in the Chord Ring, 
         if operation was successfully return True
         else return False
         '''
-        node = self.lookup(key)
+        node = self.lookup(hashx)
+        print(f'HASH {hashx}')
+        print(f'NODE {node.id}')
         if node:
-            success = node.store_key(key, value)
-            if success:
-                node.successor.update_predecessor_key(key, value)
-                print(f'Key {key} was saved in node {node._id}')
-                return True
+            new_value = self.add_hash_to_value(hashx, value)
+            node.store_key(key, new_value)
+            node.successor.update_predecessor_key(key, new_value)
+            print(f'Key with hash {key} was saved in node {node.id}')
+            return True
         print(f'Error: Could not save key {key} in the system')
         return False
+
+    def add_hash_to_value(self, hashx, value):
+        new_value = (hashx, value[0], value[1], value[2], value[3])
+        return new_value
 
     def store_key(self, key, value):
         '''
         Store key and value
         '''
-        try:
-            self._keys[key].append(value)
-        except:
-            self.keys[key] = [value]
-        return True
+        self._keys[key] = value
 
-    def get_value(self, key):
+    def get_value(self, hashx, key):
         '''
         Return the value of a key stored in the Chord Ring
         '''
-        node = self.lookup(key)
+        node = self.lookup(hashx)
         if node and key in node.keys.keys():
             return node.keys[key]
         return None
@@ -327,20 +329,23 @@ class ChordNode:
         '''
         Return all the data store in the Chord Ring
         '''
-        data = []
-        data.append(self.keys)
+        data = self.process_data(self.keys)
 
-        first_node_id = self._id
-        node_id = self.successor._id
-        while node_id != first_node_id:
+        node = self.successor
+        while node.id != self.id:
             try:
-                successor = self.successor
-                data.append(successor.keys)
-                node_id = successor._id
+                data += self.process_data(node.keys)
+                node = node.successor
             except:
                 print(
-                    f'Error: Trying to get the values in the chord node {self._id}')
+                    f'Error: Trying to get the values in the chord node {self.id}')
 
+        return data
+
+    def process_data(self, keys):
+        data = []
+        for _, title, author, gender, _ in keys.values():
+            data.append((title, author, gender))
         return data
 
 
@@ -364,6 +369,7 @@ def main(address, bits, node_address=None):
     idx = hashing(bits, address)
 
     node = get_chord_node_instance(idx)
+    print(node)
     if node:
         print(f'Error: There is another node in the system with the same id, please try another address')
         return
@@ -376,8 +382,8 @@ def main(address, bits, node_address=None):
         return
 
     node = ChordNode(idx, bits)
-    uri = deamon.register(node)
     ns = Pyro4.locateNS()
+    uri = deamon.register(node)
     ns.register(f'CHORD{idx}', uri)
 
     request_thread = threading.Thread(target=deamon.requestLoop)
@@ -385,7 +391,9 @@ def main(address, bits, node_address=None):
     request_thread.start()
 
     if node_address:
+        print(node_address)
         node_id = hashing(bits, node_address)
+        print(f'node_id{node_id}')
         join_success = node.join(node_id)
     else:
         join_success = node.join()
