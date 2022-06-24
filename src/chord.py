@@ -1,3 +1,4 @@
+from cmath import e
 from concurrent.futures import process
 import sys
 import random
@@ -128,7 +129,8 @@ class ChordNode:
                 self.update_others()
 
                 print(f'\nJoin node {self.id} with {node_id}')
-            except:
+            except Exception as error:
+                print(error)
                 print(f'\nError: Could not join node {self.id} with {node_id}')
                 return False
 
@@ -147,9 +149,10 @@ class ChordNode:
         self.successor = node.find_successor(self._finger_table_start[1]).id
         self.predecessor = self.successor.node_finger_table[0]
 
-        successor_keys = self.successor.keys.keys()
-        for key in successor_keys:
-            if self.in_range(key, self.node_finger_table[0] + 1, self.id + 1):
+        successor_keys = self.successor.keys.items()
+        for key, value in successor_keys:
+            hashx, _, _, _, _ = value
+            if self.in_range(hashx, self.node_finger_table[0] + 1, self.id + 1):
                 self.keys[key] = self.successor.pop_key(key)
 
         self.successor.successor.predecessor_keys = self.successor.keys
@@ -204,11 +207,12 @@ class ChordNode:
         Periodically verify local node's inmediate successor and 
         tell the successor about local node
         '''
-        if self.successor is None:
-            if self._successor_list:
-                self.successor = self._successor_list.pop(0)
-            else:
+        while self.successor is None:
+            if not self._successor_list:
                 self.successor = self.id
+                return
+            else:
+                self.successor = self._successor_list.pop(0)
 
         node = self.successor.predecessor
         if node and self.in_range(node.id, self.id + 1, self._node_finger_table[1]) and ((self.id + 1) % self.size) != self._node_finger_table[1]:
@@ -291,9 +295,11 @@ class ChordNode:
         else return False
         '''
         node = self.lookup(hashx)
+        print(f'HASH {hashx}')
+        print(f'NODE {node.id}')
         if node:
             new_value = self.add_hash_to_value(hashx, value)
-            self._keys[key] = new_value
+            node.store_key(key, new_value)
             node.successor.update_predecessor_key(key, new_value)
             print(f'Key with hash {key} was saved in node {node.id}')
             return True
@@ -304,17 +310,11 @@ class ChordNode:
         new_value = (hashx, value[0], value[1], value[2], value[3])
         return new_value
 
-    # def store_key(self, hashx, value):
-    #     '''
-    #     Store key and value
-    #     '''
-    #     key = value[0] + value[1]
-    #     self._keys[key] = (hashx, value[0], value[1], value[2], value[3])
-    #     # try:
-    #     #     self._keys[key].append(value)
-    #     # except:
-    #     #     self.keys[key] = [value]
-    #     return True
+    def store_key(self, key, value):
+        '''
+        Store key and value
+        '''
+        self._keys[key] = value
 
     def get_value(self, hashx, key):
         '''
@@ -369,10 +369,10 @@ def main(address, bits, node_address=None):
     idx = hashing(bits, address)
 
     node = get_chord_node_instance(idx)
-    # print(node)
-    # if node:
-    #     print(f'Error: There is another node in the system with the same id, please try another address')
-    #     return
+    print(node)
+    if node:
+        print(f'Error: There is another node in the system with the same id, please try another address')
+        return
 
     host_ip, host_port = address.split(':')
     try:

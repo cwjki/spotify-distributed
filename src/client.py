@@ -1,8 +1,7 @@
-from crypt import methods
 from serpent import tobytes
 import os
 import sys
-from flask import Flask, request, render_template, redirect, url_for
+from flask import Flask, request, render_template
 from flask_bootstrap import Bootstrap
 from utils import get_song_metadata, get_spotify_node_instance
 from spotify import SpotifyNode
@@ -40,9 +39,10 @@ def all_songs():
         flag = 'songs'
         metadata = 'todas las canciones'
         data = spotify_node.get_all_songs()
+        song_count = len(data)
         # return songs_list(flag, metadata, data)
         # return redirect(url_for('songs_list', flag=flag, metadata=metadata, data=data))
-        return render_template('result.html', content=[flag, metadata, data])
+        return render_template('result.html', content=[flag, metadata, data, song_count])
 
 
 @app.route('/music-player', methods=['GET', 'POST'])
@@ -50,8 +50,10 @@ def music_player():
     song = request.form['song']
     title, author, _ = get_song_metadata(song)
     song_key = title + ' ' + author
+    print(song_key)
     song_file = spotify_node.get_song(song_key)
 
+    print(song_file[1])
     encode_song = tobytes(song_file[4])
     with open('static/download/track.mp3', 'wb') as file:
         file.write(encode_song)
@@ -68,15 +70,17 @@ def upload_song():
         song_file = request.files['songfile']
 
         song_key = title + ' ' + author
+        spotify_node.save_song(
+            song_key, (title, author, gender, song_file.read()))
 
-        if song_file and allowed_file(song_file.filename):
-            filename = secure_filename(song_file.filename)
-            song_file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        # if song_file and allowed_file(song_file.filename):
+        #     filename = secure_filename(song_file.filename)
+        #     song_file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
-        with open('static/upload/' + filename, 'rb') as file:
-            song_content = file.read()
+        # with open('static/upload/' + filename, 'rb') as file:
+        #     song_content = file.read()
 
-        spotify_node.save_song(song_key, (title, author, gender, song_content))
+        # spotify_node.save_song(song_key, (title, author, gender, song_content))
 
         return render_template('home.html')
     else:
@@ -91,7 +95,8 @@ def search_by_title():
         flag = 'title'
         metadata = title
         data = spotify_node.get_songs_by_title(title)
-        return render_template('result.html', content=[flag, metadata, data])
+        song_count = len(data)
+        return render_template('result.html', content=[flag, metadata, data, song_count])
     else:
         return render_template('search_by_title.html')
 
@@ -103,7 +108,8 @@ def search_by_gender():
         flag = 'gender'
         metadata = gender
         data = spotify_node.get_songs_by_gender(gender)
-        return render_template('result.html', content=[flag, metadata, data])
+        song_count = len(data)
+        return render_template('result.html', content=[flag, metadata, data, song_count])
     else:
         return render_template('search_by_gender.html')
 
@@ -115,7 +121,8 @@ def search_by_author():
         flag = 'author'
         metadata = author
         data = spotify_node.get_songs_by_author(author)
-        return render_template('result.html', content=[flag, metadata, data])
+        song_count = len(data)
+        return render_template('result.html', content=[flag, metadata, data, song_count])
     else:
         return render_template('search_by_author.html')
 
