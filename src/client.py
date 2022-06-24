@@ -1,7 +1,8 @@
+from crypt import methods
 from serpent import tobytes
 import os
 import sys
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, redirect, url_for
 from flask_bootstrap import Bootstrap
 from utils import get_song_metadata, get_spotify_node_instance
 from spotify import SpotifyNode
@@ -39,7 +40,23 @@ def all_songs():
         flag = 'songs'
         metadata = 'todas las canciones'
         data = spotify_node.get_all_songs()
+        # return songs_list(flag, metadata, data)
+        # return redirect(url_for('songs_list', flag=flag, metadata=metadata, data=data))
         return render_template('result.html', content=[flag, metadata, data])
+
+
+@app.route('/music-player', methods=['GET', 'POST'])
+def music_player():
+    song = request.form['song']
+    title, author, _ = get_song_metadata(song)
+    song_key = title + ' ' + author
+    song_file = spotify_node.get_song(song_key)
+
+    encode_song = tobytes(song_file[4])
+    with open('static/download/track.mp3', 'wb') as file:
+        file.write(encode_song)
+
+    return render_template('music_player.html', content=[song])
 
 
 @app.route("/upload-song", methods=['GET', 'POST'])
