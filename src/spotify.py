@@ -100,7 +100,7 @@ class SpotifyNode:
             try:
                 hashx = hashing(self.m, song_key)
                 print(f'HASH {hashx}')
-                if not hashx:
+                if hashx is None:
                     print(
                         f'Error: Could not get the hash for the song key {song_key}')
                     return song
@@ -127,7 +127,7 @@ class SpotifyNode:
 
             try:
                 hashx = hashing(self.m, song_key)
-                if not hashx:
+                if hashx is None:
                     print(
                         f'Error: Could not get the hash for the song key {song_key}')
 
