@@ -49,7 +49,8 @@ def all_songs():
         metadata = 'todas las canciones'
 
         data = make_request(0)
-        song_count = len(data)
+        data = data if data else []
+        song_count = len(data) if data else 0
 
         return render_template('result.html', content=[flag, metadata, data, song_count])
 
@@ -59,10 +60,8 @@ def music_player():
     song = request.form['song']
     title, author, _ = get_song_metadata(song)
     song_key = title + ' ' + author
-    print(song_key)
     song_file = make_request(1, song_key)
 
-    print(song_file[1])
     encode_song = tobytes(song_file[4])
     with open('static/download/track.mp3', 'wb') as file:
         file.write(encode_song)
@@ -96,7 +95,8 @@ def search_by_title():
         metadata = title
 
         data = make_request(4, title)
-        song_count = len(data)
+        data = data if data else []
+        song_count = len(data) if data else 0
 
         return render_template('result.html', content=[flag, metadata, data, song_count])
     else:
@@ -111,7 +111,8 @@ def search_by_gender():
         metadata = gender
 
         data = make_request(3, gender)
-        song_count = len(data)
+        data = data if data else []
+        song_count = len(data) if data else 0
 
         return render_template('result.html', content=[flag, metadata, data, song_count])
     else:
@@ -126,7 +127,8 @@ def search_by_author():
         metadata = author
 
         data = make_request(2, author)
-        song_count = len(data)
+        data = data if data else []
+        song_count = len(data) if data else 0
 
         return render_template('result.html', content=[flag, metadata, data, song_count])
     else:
