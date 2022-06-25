@@ -1,9 +1,8 @@
-from random import randint
 import sys
-import threading
 import time
-from traceback import print_tb
+import threading
 import Pyro4
+from random import randint
 from utils import get_chord_node_instance, hashing, get_spotify_node_instance
 
 
@@ -90,7 +89,6 @@ class SpotifyNode:
         '''
         Return a song store in the Chord Ring given a song_key
         '''
-        print(f'SONG KEY {song_key}')
         song = None
         while True:
             chord_node = get_chord_node_instance(self.chord_id)
@@ -99,14 +97,12 @@ class SpotifyNode:
 
             try:
                 hashx = hashing(self.m, song_key)
-                print(f'HASH {hashx}')
                 if hashx is None:
                     print(
                         f'Error: Could not get the hash for the song key {song_key}')
                     return song
 
                 song = chord_node.get_value(hashx, song_key)
-                print(song)
                 return song
 
             except:
@@ -135,12 +131,12 @@ class SpotifyNode:
                 if success:
                     print(
                         f'Key {song_key} was saved in node {chord_node.id}')
-                    return
+                    return True
             except:
                 if not self.chord_successors_list:
                     print(
                         f'Error: Could not connect with chord node {self.chord_id}')
-                    break
+                    return False
 
     def get_all_songs(self):
         '''
@@ -154,12 +150,10 @@ class SpotifyNode:
                 chord_node = self.change_chord_node()
 
             try:
-                print("BB")
                 all_songs = chord_node.get_all_data()
                 return all_songs
 
             except:
-                print("AA")
                 if not self.chord_successors_list:
                     print(
                         f'Error: Could not connect with chord node {self.chord_id}')

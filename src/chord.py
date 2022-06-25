@@ -1,5 +1,3 @@
-from cmath import e
-from concurrent.futures import process
 import sys
 import random
 import threading
@@ -295,8 +293,8 @@ class ChordNode:
         else return False
         '''
         node = self.lookup(hashx)
-        print(f'HASH {hashx}')
-        print(f'NODE {node.id}')
+        # print(f'HASH {hashx}')
+        # print(f'NODE {node.id}')
         if node:
             new_value = self.add_hash_to_value(hashx, value)
             node.store_key(key, new_value)
@@ -391,9 +389,7 @@ def main(address, bits, node_address=None):
     request_thread.start()
 
     if node_address:
-        print(node_address)
         node_id = hashing(bits, node_address)
-        print(f'node_id{node_id}')
         join_success = node.join(node_id)
     else:
         join_success = node.join()
