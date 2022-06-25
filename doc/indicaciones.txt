@@ -1,4 +1,0 @@
-Vamos a dejar la rama main con una version estable del proyecto, main solo la actualizamos con 
-develop cuando develop este estable, por tanto vamos a crear siempre una rama con nuestro nombre a partir de develop
-y vamos trabajando asi, o sea, trabajamos en nuestra rama y vamos actualizando develop y en algun punto, actualizamos 
-main de develop.
