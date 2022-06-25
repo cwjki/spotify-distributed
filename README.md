@@ -14,12 +14,13 @@ El proyecto está conformado por tres tipos de nodos: chord, spotify y client
 
 -   Los nodos de tipo client se comunican solo con nodos de tipo spotify a los cuales realizan sus peticiones.
 
+### Comunicación
+
 Para la comunicación entre los nodos se hace uso de la
 biblioteca Pyro4, la cual de forma sencilla permite el acceso
 a los métodos y propiedades de otro nodo que se encuentre en la red. Se hizo uso además de un servidor de nombres para asignarles identificadores a los nodos a partir de su ip y puerto creando su proxy para evitar conocer la uri del mismo.
 
-Para el funcionamiento del sistema es necesario la existencia de, al menos, un nodo de tipo chord, un nodo de tipo
-spotify y uno de tipo client.
+### Funcionalidades
 
 El cliente puede realizar las siguientes peticiones a los
 nodos spotify:
@@ -41,26 +42,30 @@ nodos spotify:
 -   get_songs_by_gender(gender): Retorna de las canciones almacenadas aquellas que tengan en sus metadatos el 'género'
     especificado.
 
-Para la visualización del proyecto se hizo uso del framework
-Flask para la creación de un sitio web en el cual probar las
-funcionalidades descritas.
+### Sobre el sistema
 
-Para distribuir el balance de las peticiones, los nodos client eligen de manera aleatoria entre los
-nodos spotify disponibles (spotify_nodes_list). Cada nodo spotify conoce en todo
-momento los nodos spotify activos, y al procesar una
-petición de los nodos client le envía a los mismos la disponibilidad de estos actualizada (spotify_nodes_list). De igual forma, si un cliente realiza una
-petición a un nodo spotify y este se encuentra inactivo,
-el nodo client intentará enviar la petición al próximo
-nodo spotify que tenga en su lista, hasta que la petición
-sea atendida o hasta que transcurran 20 segundos,
-donde se considera que no existe nodo spotify disponible
-para atender el pedido.
+-   Para el funcionamiento del sistema es necesario la existencia de, al menos, un nodo de tipo chord, un nodo de tipo
+    spotify y uno de tipo client.
 
-Los nodos spotify contienen tanto el id de un nodo chord
-como su lista de sucesores de forma tal que si el nodo chord se cae los nodos spotify se conectan a uno de los sucesores activos para continuar con la petición.
+-   Para la visualización del proyecto se hizo uso del framework
+    Flask para la creación de un sitio web en el cual probar las
+    funcionalidades descritas.
 
-Cada nodo chord guarda las llaves almacenadas en su predecesor, para evitar la pérdida de datos en caso de que
-este se desconecte. De igual forma cada nodo chord está constantemente ejecutando un hilo que reestabiliza el sistema, actualizando su sucesor y su finger table.
+-   Para distribuir el balance de las peticiones, los nodos client eligen de manera aleatoria entre los
+    nodos spotify disponibles (spotify_nodes_list). Cada nodo spotify conoce en todo
+    momento los nodos spotify activos, y al procesar una
+    petición de los nodos client le envía a los mismos la disponibilidad de estos actualizada (spotify_nodes_list). De igual forma, si un cliente realiza una
+    petición a un nodo spotify y este se encuentra inactivo,
+    el nodo client intentará enviar la petición al próximo
+    nodo spotify que tenga en su lista, hasta que la petición
+    sea atendida o hasta que transcurran 20 segundos,
+    donde se considera que no existe nodo spotify disponible
+    para atender el pedido.
+
+-   Los nodos spotify contienen tanto el id de un nodo chord
+    como su lista de sucesores de forma tal que si el nodo chord se cae los nodos spotify se conectan a uno de los sucesores activos para continuar con la petición.
+-   Cada nodo chord guarda las llaves almacenadas en su predecesor, para evitar la pérdida de datos en caso de que
+    este se desconecte. De igual forma cada nodo chord está constantemente ejecutando un hilo que reestabiliza el sistema, actualizando su sucesor y su finger table.
 
 ### Ejecución del proyecto
 
