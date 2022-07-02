@@ -367,7 +367,6 @@ def main(address, bits, node_address=None):
     idx = hashing(bits, address)
 
     node = get_chord_node_instance(idx)
-    print(node)
     if node:
         print(f'Error: There is another node in the system with the same id, please try another address')
         return
