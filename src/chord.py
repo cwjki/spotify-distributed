@@ -206,11 +206,14 @@ class ChordNode:
         tell the successor about local node
         '''
         while self.successor is None:
+            print(self._successor_list)
             if not self._successor_list:
                 self.successor = self.id
                 return
-            else:
-                self.successor = self._successor_list.pop(0)
+                
+            successor = self._successor_list.pop(0)
+            if get_chord_node_instance(successor):
+                self.successor = successor
 
         node = self.successor.predecessor
         if node and self.in_range(node.id, self.id + 1, self._node_finger_table[1]) and ((self.id + 1) % self.size) != self._node_finger_table[1]:
