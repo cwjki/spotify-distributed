@@ -210,7 +210,7 @@ class ChordNode:
             if not self._successor_list:
                 self.successor = self.id
                 return
-                
+
             successor = self._successor_list.pop(0)
             if get_chord_node_instance(successor):
                 self.successor = successor
@@ -407,9 +407,9 @@ def main(address, bits, node_address=None):
         target=print_node_function, args=[node])
     print_tables_thread.start()
 
-    print_tables_thread = threading.Thread(
+    update_successor_thread = threading.Thread(
         target=node.update_successor_list, args=[])
-    print_tables_thread.start()
+    update_successor_thread.start()
 
 
 if __name__ == '__main__':
