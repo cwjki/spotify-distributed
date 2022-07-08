@@ -206,8 +206,20 @@ class ChordNode:
         tell the successor about local node
         '''
         while self.successor is None:
-            print(self._successor_list)
             if not self._successor_list:
+                # try get a node from the finger table
+                node = self.check_finger_successor()
+                if node:
+                    self.successor = node.id
+                    return
+                # try to add the predecessor as node successor
+                predecessor = self._node_finger_table[0]
+                predecessor = get_chord_node_instance(predecessor)
+                if predecessor:
+                    self.successor = predecessor.id
+                    return
+
+                # you are alone in the network
                 self.successor = self.id
                 return
 
@@ -220,6 +232,16 @@ class ChordNode:
             self.successor = node.id
         if self.successor:
             self.successor.notify(self)
+
+    def check_finger_successor(self):
+        '''
+        Check if any node in the finger table is alive
+        '''
+        for node in self._node_finger_table[1:]:
+            node = get_chord_node_instance(node)
+            if node:
+                return node
+        return None
 
     def notify(self, node):
         '''
